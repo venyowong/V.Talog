@@ -7,9 +7,9 @@ namespace V.Talog
 {
     public class Indexer
     {
-        private Index index;
-        private List<Tag> tags = new List<Tag>();
-        private string data;
+        protected Index index;
+        protected List<Tag> tags = new List<Tag>();
+        protected string data;
 
         public Indexer(Index index)
         {
@@ -26,13 +26,13 @@ namespace V.Talog
             return this;
         }
 
-        public Indexer Data(string data)
+        public virtual Indexer Data(string data)
         {
             this.data = data;
             return this;
         }
 
-        public bool Save()
+        public void Save()
         {
             if (!this.tags.Any())
             {
@@ -43,7 +43,7 @@ namespace V.Talog
                 throw new Exception("当前索引对象还未设置 Data");
             }
 
-            return this.index.Push(this.tags, this.data);
+            this.index.Push(this.tags, this.data);
         }
     }
 }

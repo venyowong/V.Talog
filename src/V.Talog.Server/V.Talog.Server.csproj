@@ -14,4 +14,8 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\V.Talog.Core\V.Talog.Core.csproj" />
+  </ItemGroup>
+
 </Project>
