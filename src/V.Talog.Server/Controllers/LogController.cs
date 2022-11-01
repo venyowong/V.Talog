@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using V.QueryParser;
 using V.Talog.Server.Models;
 
 namespace V.Talog.Server.Controllers
@@ -76,6 +77,27 @@ namespace V.Talog.Server.Controllers
             if (json == null)
             {
                 return;
+            }
+
+            Searcher searcher;
+            if (json["type"].ToString() == "1")
+            {
+                searcher = this.taloger.CreateHeaderSearcher(request.Index, json["head"].ToString(), request.Regex);
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(request.JsonQuery))
+                {
+                    searcher = this.taloger.CreateJsonSearcher(request.Index);
+                }
+                else if (!string.IsNullOrWhiteSpace(request.Regex))
+                {
+                    searcher = this.taloger.CreateRegexSearcher(request.Index, request.Regex);
+                }
+                else
+                {
+                    searcher = this.taloger.CreateSearcher(request.Index);
+                }
             }
         }
     }

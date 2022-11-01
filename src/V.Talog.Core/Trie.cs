@@ -61,5 +61,26 @@ namespace V.Talog
 
             return node.GetBuckets(chars, i + 1);
         }
+
+        public List<string> GetLeaves()
+        {
+            var result = new List<string>();
+            if (this.Buckets.Any() && this.Char != default)
+            {
+                result.Add(this.Char.ToString());
+            }
+            foreach (var node in this.Nodes)
+            {
+                if (this.Char != default)
+                {
+                    result.AddRange(node.GetLeaves().Select(x => this.Char + x));
+                }
+                else
+                {
+                    result.AddRange(node.GetLeaves());
+                }
+            }
+            return result;
+        }
     }
 }

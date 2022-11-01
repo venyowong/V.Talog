@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using V.QueryParser;
 
 namespace V.Talog
 {
@@ -35,9 +36,10 @@ namespace V.Talog
         /// <param name="taloger"></param>
         /// <param name="index"></param>
         /// <param name="head">若 head 为 null，则默认使用 index 作为 head</param>
+        /// <param name="regex"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static HeaderSearcher CreateHeaderSearcher(this Taloger taloger, string index, string head = null)
+        public static HeaderSearcher CreateHeaderSearcher(this Taloger taloger, string index, string head = null, string regex = null)
         {
             if (string.IsNullOrWhiteSpace(index))
             {
@@ -48,7 +50,7 @@ namespace V.Talog
             {
                 head = index;
             }
-            return new HeaderSearcher(head, taloger.GetIndex(index));
+            return new HeaderSearcher(head, taloger.GetIndex(index), regex);
         }
 
         public static JsonIndexer CreateJsonIndexer(this Taloger taloger, string index)
@@ -94,6 +96,29 @@ namespace V.Talog
             }
             services.AddSingleton(taloger);
             return services;
+        }
+
+        public static Query CreateQueryByExpression(this Taloger taloger, string index, string expression)
+        {
+            var queryExpression = new QueryExpression(expression);
+            var idx = taloger.GetIndex(index);
+        }
+
+        private Query BuildQuery(QueryExpression expression, Index index)
+        {
+            if (expression.Type == QueryType.Base)
+            {
+                switch (expression.Ope)
+                {
+                    case Symbol.Eq:
+                        return new Query(expression.Key, expression.Value);
+                    case Symbol.Neq:
+                        return new Query(expression.Key, expression.Value).Not();
+                    case Symbol.Gt:
+                        index.GetTagValues(expression.Key);
+                        break;
+                }
+            }
         }
     }
 }

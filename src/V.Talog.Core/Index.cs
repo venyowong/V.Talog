@@ -161,6 +161,16 @@ namespace V.Talog
             return trie.GetBuckets(tag.Value.ToCharArray());
         }
 
+        public List<string> GetTagValues(string label)
+        {
+            if (!this.Tries.TryGetValue(label, out var trie))
+            {
+                return null;
+            }
+
+            return trie.GetLeaves();
+        }
+
         public void Save()
         {
             using (var file = File.OpenWrite(this.indexPath))
