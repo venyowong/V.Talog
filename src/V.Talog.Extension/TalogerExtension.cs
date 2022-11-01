@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -82,6 +83,17 @@ namespace V.Talog
             }
 
             return new RegexSearcher(regex, taloger.GetIndex(index));
+        }
+
+        public static IServiceCollection AddTaloger(this IServiceCollection services, Action<Config> config = null)
+        {
+            var taloger = new Taloger();
+            if (config != null)
+            {
+                config(taloger.Config);
+            }
+            services.AddSingleton(taloger);
+            return services;
         }
     }
 }

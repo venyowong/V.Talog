@@ -18,9 +18,12 @@ namespace V.Talog
             this.head = $"[{head}]";
         }
 
-        public override Indexer Data(string data)
+        public override Indexer Data(params string[] data)
         {
-            this.data = $"{this.head} {data}";
+            foreach (var item in data)
+            {
+                this.data.Add($"{this.head} {data}");
+            }
             return this;
         }
     }

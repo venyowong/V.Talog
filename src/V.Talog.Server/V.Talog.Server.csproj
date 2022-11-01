@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
@@ -15,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\V.Talog.Core\V.Talog.Core.csproj" />
+    <ProjectReference Include="..\V.Talog.Extension\V.Talog.Extension.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,7 +9,7 @@ namespace V.Talog
     {
         protected Index index;
         protected List<Tag> tags = new List<Tag>();
-        protected string data;
+        protected List<string> data = new List<string>();
 
         public Indexer(Index index)
         {
@@ -26,9 +26,9 @@ namespace V.Talog
             return this;
         }
 
-        public virtual Indexer Data(string data)
+        public virtual Indexer Data(params string[] data)
         {
-            this.data = data;
+            this.data.AddRange(data);
             return this;
         }
 
@@ -38,12 +38,12 @@ namespace V.Talog
             {
                 throw new Exception("当前索引对象还未添加标签");
             }
-            if (string.IsNullOrWhiteSpace(this.data))
+            if (!this.data.Any())
             {
                 throw new Exception("当前索引对象还未设置 Data");
             }
 
-            this.index.Push(this.tags, this.data);
+            this.index.Push(this.tags, this.data.ToArray());
         }
     }
 }
