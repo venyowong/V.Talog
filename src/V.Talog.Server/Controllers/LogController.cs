@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using V.Common.Extensions;
 using V.QueryParser;
 using V.Talog.Server.Models;
 
@@ -67,38 +69,109 @@ namespace V.Talog.Server.Controllers
 
         [HttpPost]
         [Route("search")]
-        public void Search([FromBody] SearchLogRequest request)
+        public Result Search([FromBody] SearchLogRequest request)
         {
             var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
             var query = new Query("name", request.Index);
             var json = storedIndexSearcher.SearchJsonLogs(query)
                 ?.Select(x => x.Data)
-                .FirstOrDefault();
+                .LastOrDefault();
             if (json == null)
             {
-                return;
+                return new Result { Code = -1, Msg = $"index {request.Index} 不存在，请先插入数据" };
             }
 
-            Searcher searcher;
+            var tagQuery = this.taloger.CreateQueryByExpression(request.Index, request.TagQuery);
+            if (tagQuery == null)
+            {
+                return new Result { Code = -1, Msg = $"{request.TagQuery} 解析失败，请检查表达式" };
+            }
+
             if (json["type"].ToString() == "1")
             {
-                searcher = this.taloger.CreateHeaderSearcher(request.Index, json["head"].ToString(), request.Regex);
+                var searcher = this.taloger.CreateHeaderSearcher(request.Index, json["head"].ToString());
+                var logs = searcher.SearchLogs(tagQuery);
+                return this.HandleRegex(logs, request.Index, request.Regex, request.RegexQuery);
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(request.JsonQuery))
                 {
-                    searcher = this.taloger.CreateJsonSearcher(request.Index);
-                }
-                else if (!string.IsNullOrWhiteSpace(request.Regex))
-                {
-                    searcher = this.taloger.CreateRegexSearcher(request.Index, request.Regex);
+                    var searcher = this.taloger.CreateJsonSearcher(request.Index);
+                    var logs = searcher.SearchJsonLogs(query);
+                    if (logs.IsNullOrEmpty())
+                    {
+                        return Result.Success(logs);
+                    }
+
+                    Func<TaggedJsonLog<JObject>, bool> filter = null;
+                    if (!string.IsNullOrWhiteSpace(request.JsonQuery))
+                    {
+                        var jsonQuery = new QueryExpression(request.JsonQuery);
+                        filter = log =>
+                        {
+                            return jsonQuery.Execute(request.Index, name =>
+                            {
+                                if (!log.Data.ContainsKey(name))
+                                {
+                                    throw new MissingFieldException(name);
+                                }
+
+                                return log.Data[name].ToString();
+                            });
+                        };
+                    }
+
+                    return Result.Success(logs.Where(l =>
+                    {
+                        if (filter == null)
+                        {
+                            return true;
+                        }
+
+                        return filter(l);
+                    }).ToList());
                 }
                 else
                 {
-                    searcher = this.taloger.CreateSearcher(request.Index);
+                    var searcher = this.taloger.CreateSearcher(request.Index);
+                    var logs = searcher.SearchLogs(tagQuery);
+                    return this.HandleRegex(logs, request.Index, request.Regex, request.RegexQuery);
                 }
             }
+        }
+
+        private Result HandleRegex(List<TaggedLog> logs, string index, string regex, string regexQuery)
+        {
+            if (logs.IsNullOrEmpty())
+            {
+                return Result.Success(logs);
+            }
+
+            if (!string.IsNullOrWhiteSpace(regex))
+            {
+                Func<ParsedLog, bool> filter = null;
+                if (!string.IsNullOrWhiteSpace(regexQuery))
+                {
+                    var query = new QueryExpression(regexQuery);
+                    filter = log =>
+                    {
+                        return query.Execute(index, name =>
+                        {
+                            if (!log.Groups.ContainsKey(name))
+                            {
+                                throw new MissingFieldException(name);
+                            }
+
+                            return log.Groups[name];
+                        });
+                    };
+                }
+
+                return Result.Success(logs.SelectParsedLogs(regex, filter));
+            }
+
+            return Result.Success(logs);
         }
     }
 }

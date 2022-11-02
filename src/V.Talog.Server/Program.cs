@@ -1,6 +1,18 @@
+using Serilog;
+using Serilog.Events;
 using V.Talog;
+using V.Talog.Server;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) =>
+{
+    config.MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .MinimumLevel.Override("System", LogEventLevel.Warning)
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext();
+});
 
 // Add services to the container.
 
@@ -8,7 +20,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddTaloger();
+builder.Services.AddTaloger(getMapping: taloger => new IndexMapping(taloger));
 
 var app = builder.Build();
 

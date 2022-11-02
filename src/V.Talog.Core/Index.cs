@@ -12,11 +12,12 @@ namespace V.Talog
     [ProtoContract]
     public class Index : IDisposable
     {
-        public string name;
         private Config config;
         private string indexPath;
         private string unsavedLogsPath;
         private volatile ConcurrentBag<TaggedLog> unsavedLogs;
+
+        public string Name { get; set; }
 
         [ProtoMember(1)]
         public ConcurrentDictionary<string, Trie> Tries { get; set; }
@@ -30,7 +31,7 @@ namespace V.Talog
 
         public Index(string name, Config config)
         {
-            this.name = name;
+            this.Name = name;
             this.config = config;
             if (!Directory.Exists(config.DataPath))
             {
@@ -76,13 +77,13 @@ namespace V.Talog
             {
                 Task.Run(() =>
                 {
-                    Log.Information($"index {this.name} 检测到未保存的历史数据");
+                    Log.Information($"index {this.Name} 检测到未保存的历史数据");
                     foreach (var log in this.unsavedLogs)
                     {
                         // 由于数据已存在 unsavedLogs 中，因此不需要调用 Push 方法，否则会导致数据重复
                         this.PushWithNoGuarantee(log.Tags, log.Data);
                     }
-                    Log.Information($"index {this.name} 历史数据保存完毕");
+                    Log.Information($"index {this.Name} 历史数据保存完毕");
                 });
             }
         }
@@ -124,7 +125,7 @@ namespace V.Talog
         {
             this.LastUsedTime = DateTime.Now;
 
-            var bucket = new Bucket(this.name, tags, this.config);
+            var bucket = new Bucket(this.Name, tags, this.config);
             bucket.Append(data);
             if (!this.Buckets.ContainsKey(bucket.Key))
             {
@@ -179,9 +180,12 @@ namespace V.Talog
             }
 
             this.unsavedLogs = new ConcurrentBag<TaggedLog>();
-            if (File.Exists(this.unsavedLogsPath))
+            lock (this)
             {
-                File.Delete(this.unsavedLogsPath);
+                if (File.Exists(this.unsavedLogsPath))
+                {
+                    File.Delete(this.unsavedLogsPath);
+                }
             }
         }
 

@@ -88,7 +88,7 @@ namespace V.Talog
                     {
                         if (this.indexes.TryRemove(key, out index))
                         {
-                            Log.Debug($"index {key} 已超过 {this.Config.IdleIndexInterval}s 未被使用，Dispose 释放资源");
+                            Log.Information($"index {key} 已超过 {this.Config.IdleIndexInterval}s 未被使用，Dispose 释放资源");
                             index.Dispose();
                         }
                     }

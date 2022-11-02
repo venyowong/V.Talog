@@ -15,29 +15,10 @@ namespace V.Talog
     public class HeaderSearcher : Searcher
     {
         private string head;
-        private Regex regex;
-        private List<string> names;
-        private Dictionary<string, Func<string, bool>> funcs = new Dictionary<string, Func<string, bool>>();
 
-        public HeaderSearcher(string head, Index index, string regex = null) : base(index)
+        public HeaderSearcher(string head, Index index) : base(index)
         {
             this.head = $"[{head}]";
-            this.regex = new Regex(regex);
-            this.regex.GetGroupNames()
-                .Where(x => !int.TryParse(x, out int _))
-                .ToList();
-        }
-
-        /// <summary>
-        /// 添加过滤器
-        /// </summary>
-        /// <param name="name">若 name 不在正则表达式中，func 将不起作用</param>
-        /// <param name="func"></param>
-        /// <returns></returns>
-        public HeaderSearcher AddFilter(string name, Func<string, bool> func)
-        {
-            this.funcs[name] = func;
-            return this;
         }
 
         public override List<TaggedLog> SearchLogs(Query query)
@@ -82,14 +63,6 @@ namespace V.Talog
                 result.Add(log);
             }
             return result;
-        }
-
-        public List<ParsedLog> SearchParsedLogs(Query query)
-        {
-            var logs = this.SearchLogs(query);
-            return logs.Select(x => x.Convert2ParsedLog(this.regex, this.names, this.funcs))
-                .Where(x => x != null)
-                .ToList();
         }
     }
 }

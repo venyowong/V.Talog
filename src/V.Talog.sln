@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "V.Talog.Extension", "V.Talo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "V.Talog.Server", "V.Talog.Server\V.Talog.Server.csproj", "{07A4DBED-016D-4884-AC4B-C5BF658C8315}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V.Talog.Test", "V.Talog.Test\V.Talog.Test.csproj", "{57EE208D-A17C-47E6-B9EC-00409FAA6682}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "V.Talog.Test", "V.Talog.Test\V.Talog.Test.csproj", "{57EE208D-A17C-47E6-B9EC-00409FAA6682}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{34D94F7A-B597-4DF6-A9D2-8BECD48B76C0}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
