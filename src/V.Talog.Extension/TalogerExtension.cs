@@ -113,13 +113,13 @@ namespace V.Talog
                     case Symbol.Neq:
                         return !value.Equals(value2);
                     case Symbol.Gt:
-                        return ((dynamic)value).CompareTo((dynamic)value2) > 0;
+                        return ((dynamic)value2).CompareTo((dynamic)value) > 0;
                     case Symbol.Gte:
-                        return ((dynamic)value).CompareTo((dynamic)value2) >= 0;
+                        return ((dynamic)value2).CompareTo((dynamic)value) >= 0;
                     case Symbol.Lt:
-                        return ((dynamic)value).CompareTo((dynamic)value2) < 0;
+                        return ((dynamic)value2).CompareTo((dynamic)value) < 0;
                     case Symbol.Lte:
-                        return ((dynamic)value).CompareTo((dynamic)value2) <= 0;
+                        return ((dynamic)value2).CompareTo((dynamic)value) <= 0;
                     default:
                         return false;
                 }
@@ -300,7 +300,7 @@ namespace V.Talog
             foreach (var tagValue in tagValues)
             {
                 var val2 = Converter.FromString(tagValue, type);
-                if (!comparer(val, val2))
+                if (!comparer(val2, val))
                 {
                     continue;
                 }
