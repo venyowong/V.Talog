@@ -18,8 +18,10 @@ namespace V.Talog.Server.Models
         /// </summary>
         public string Regex { get; set; }
 
-        public string RegexQuery { get; set; }
-
-        public string JsonQuery { get; set; }
+        /// <summary>
+        /// 字段筛选
+        /// <para>若 Regex 为空，则认为数据是 Json 格式</para>
+        /// </summary>
+        public string FieldQuery { get; set; }
     }
 }

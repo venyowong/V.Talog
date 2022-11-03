@@ -3,7 +3,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using V.Common.Extensions;
 using V.QueryParser;
+using V.Talog.Server.Attributes;
 using V.Talog.Server.Models;
+using V.User.Attributes;
 
 namespace V.Talog.Server.Controllers
 {
@@ -91,11 +93,11 @@ namespace V.Talog.Server.Controllers
             {
                 var searcher = this.taloger.CreateHeaderSearcher(request.Index, json["head"].ToString());
                 var logs = searcher.SearchLogs(tagQuery);
-                return this.HandleRegex(logs, request.Index, request.Regex, request.RegexQuery);
+                return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery);
             }
             else
             {
-                if (!string.IsNullOrWhiteSpace(request.JsonQuery))
+                if (!string.IsNullOrWhiteSpace(request.FieldQuery) && string.IsNullOrWhiteSpace(request.Regex))
                 {
                     var searcher = this.taloger.CreateJsonSearcher(request.Index);
                     var logs = searcher.SearchJsonLogs(query);
@@ -104,23 +106,19 @@ namespace V.Talog.Server.Controllers
                         return Result.Success(logs);
                     }
 
-                    Func<TaggedJsonLog<JObject>, bool> filter = null;
-                    if (!string.IsNullOrWhiteSpace(request.JsonQuery))
+                    var jsonQuery = new QueryExpression(request.FieldQuery);
+                    Func<TaggedJsonLog<JObject>, bool> filter = log =>
                     {
-                        var jsonQuery = new QueryExpression(request.JsonQuery);
-                        filter = log =>
+                        return jsonQuery.Execute(request.Index, name =>
                         {
-                            return jsonQuery.Execute(request.Index, name =>
+                            if (!log.Data.ContainsKey(name))
                             {
-                                if (!log.Data.ContainsKey(name))
-                                {
-                                    throw new MissingFieldException(name);
-                                }
+                                return null;
+                            }
 
-                                return log.Data[name].ToString();
-                            });
-                        };
-                    }
+                            return log.Data[name].ToString();
+                        });
+                    };
 
                     return Result.Success(logs.Where(l =>
                     {
@@ -136,9 +134,24 @@ namespace V.Talog.Server.Controllers
                 {
                     var searcher = this.taloger.CreateSearcher(request.Index);
                     var logs = searcher.SearchLogs(tagQuery);
-                    return this.HandleRegex(logs, request.Index, request.Regex, request.RegexQuery);
+                    return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery);
                 }
             }
+        }
+
+        [HttpGet]
+        [Route("index/list")]
+        [JwtValidation]
+        [AdminRole]
+        public object GetIndexList()
+        {
+            var indexList = this.taloger.GetIndex("stored_index").GetTagValues("name");
+            return new
+            {
+                status = 0,
+                msg = string.Empty,
+                data = indexList
+            };
         }
 
         private Result HandleRegex(List<TaggedLog> logs, string index, string regex, string regexQuery)
@@ -160,7 +173,7 @@ namespace V.Talog.Server.Controllers
                         {
                             if (!log.Groups.ContainsKey(name))
                             {
-                                throw new MissingFieldException(name);
+                                return null;
                             }
 
                             return log.Groups[name];

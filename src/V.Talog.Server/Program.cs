@@ -3,6 +3,7 @@ using Serilog;
 using Serilog.Events;
 using V.Talog;
 using V.Talog.Server;
+using V.User.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Host.UseSerilog((context, config) =>
         .ReadFrom.Configuration(context.Configuration)
         .Enrich.FromLogContext();
 });
+
+builder.Services.AddJwt(builder.Configuration["Jwt:Secret"]);
 
 // Add services to the container.
 
@@ -36,6 +39,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles();
 
 app.UseForwardedHeaders();
 
