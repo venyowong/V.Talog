@@ -172,16 +172,36 @@ namespace V.Talog
             return trie.GetLeaves();
         }
 
-        public void Save()
+        public bool RemoveBucket(string key)
         {
-            using (var file = File.OpenWrite(this.indexPath))
+            if (!this.Buckets.TryRemove(key, out var bucket))
             {
-                Serializer.Serialize(file, this);
+                return false;
             }
 
-            this.unsavedLogs = new ConcurrentBag<TaggedLog>();
+            foreach (var tag in bucket.Tags)
+            {
+                if (!this.Tries.TryGetValue(tag.Label, out var trie))
+                {
+                    continue;
+                }
+
+                trie.RemoveBucket(tag.Value.ToCharArray(), key);
+            }
+            return true;
+        }
+
+        public void Save()
+        {
             lock (this)
             {
+                using (var file = File.OpenWrite(this.indexPath))
+                {
+                    Serializer.Serialize(file, this);
+                }
+
+                this.unsavedLogs = new ConcurrentBag<TaggedLog>();
+
                 if (File.Exists(this.unsavedLogsPath))
                 {
                     File.Delete(this.unsavedLogsPath);

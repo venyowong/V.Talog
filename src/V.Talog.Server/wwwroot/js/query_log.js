@@ -4,13 +4,17 @@ let queryLogBody = {
     "title": "日志查询",
     "body": [
         {
+            label: "已保存的查询",
+            type: "select",
+            name: "queryNameOption",
+            source: `./setting/query/list?token=${token}`
+        },
+        {
             "type": "form",
             name: "query",
             "title": "搜索",
             "mode": "horizontal",
-            data: {
-                index: null
-            },
+            initApi: "./setting/query?name=${queryNameOption}&token=" + token,
             "body": [
                 {
                     "label": "Index",
@@ -39,6 +43,49 @@ let queryLogBody = {
                 }
             ],
             actions: [
+                {
+                    type: "button",
+                    label: "保存",
+                    actionType: "dialog",
+                    dialog: {
+                        title: "保存查询条件",
+                        body: {
+                            type: "form",
+                            api: {
+                                url: "./setting/savequery",
+                                method: "POST",
+                                data: {
+                                    token: token,
+                                    name: "${queryName}",
+                                    index: "${index}",
+                                    tagQuery: "${tagQuery}",
+                                    regex: "${regex}",
+                                    fieldQuery: "${fieldQuery}"
+                                }
+                            },
+                            body: {
+                                "type": "input-text",
+                                "name": "queryName",
+                                "label": "查询条件名称"
+                            }
+                        },
+                        actions: [
+                            {
+                                type: "button",
+                                actionType: "submit",
+                                label: "保存",
+                                primary: true,
+                                reload: "queryNameOption",
+                                close: true
+                            },
+                            {
+                                type: "button",
+                                actionType: "close",
+                                label: "取消"
+                            }
+                        ]
+                    }
+                },
                 {
                     type: "button",
                     label: "查询",
@@ -90,7 +137,7 @@ let queryLogBody = {
                         source: "${groups | objectToArray}",
                         items: {
                             type: "tpl",
-                            tpl: "<span class='label label-default m-l-sm'><%= data.label %>: <%= data.value %></span>"
+                            tpl: "<span class='label label-default m-l-sm'><%= data.value %>: <%= data.label %></span>"
                         }
                     }
                 ]

@@ -171,6 +171,10 @@ namespace V.Talog
                         slen = i;
                     }
                 }
+                if (slen <= 0)
+                {
+                    return results[0];
+                }
 
                 // 再处理 or 运算
                 for (int i = 0; i < slen - 1; i++)
@@ -264,6 +268,10 @@ namespace V.Talog
                     {
                         slen = i;
                     }
+                }
+                if (slen <= 0)
+                {
+                    return queries[0];
                 }
 
                 // 再处理 or 运算

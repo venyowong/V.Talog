@@ -82,5 +82,22 @@ namespace V.Talog
             }
             return result;
         }
+
+        public bool RemoveBucket(char[] chars, string key, int i = 0)
+        {
+            if (i >= chars.Length)
+            {
+                return this.Buckets.TryRemove(key, out var bucket);
+            }
+
+            var ch = chars[i];
+            var node = this.Nodes.FirstOrDefault(n => n.Char == ch);
+            if (node == null)
+            {
+                return false;
+            }
+
+            return node.RemoveBucket(chars, key, i + 1);
+        }
     }
 }

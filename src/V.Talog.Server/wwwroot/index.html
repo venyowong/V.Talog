@@ -31,7 +31,9 @@
     <script src="https://unpkg.com/amis@2.4.0/sdk/sdk.js"></script>
     <script src="js/query_log.js"></script>
     <script src="js/pageview.js"></script>
+    <script src="js/metric.js"></script>
     <script src="js/index_mapping.js"></script>
+    <script src="js/setting.js"></script>
     <script type="text/javascript">
         (function () {
             let token = localStorage.token;
@@ -50,7 +52,9 @@
                     "tabs": [
                         queryLogBody,
                         pageViewBody,
-                        indexMappingBody
+                        metricBody,
+                        indexMappingBody,
+                        settingBody
                     ]
                 }
             };

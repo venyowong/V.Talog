@@ -16,6 +16,6 @@ namespace V.Talog
         /// <summary>
         /// index 被判定为空闲的时间间隔，秒为单位
         /// </summary>
-        public double IdleIndexInterval = 5;
+        public double IdleIndexInterval = 30;
     }
 }

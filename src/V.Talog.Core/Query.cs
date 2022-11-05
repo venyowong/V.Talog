@@ -42,9 +42,13 @@ namespace V.Talog
 
         public Query And(Query query) => new Query(this, query, 2);
 
+        public Query And(string label, string value) => new Query(this, new Query(label, value), 2);
+
         public Query Or(Tag tag) => new Query(this, new Query(tag), 3);
 
         public Query Or(Query query) => new Query(this, query, 3);
+
+        public Query Or(string label, string value) => new Query(this, new Query(label, value), 3);
 
         public Query Not()
         {

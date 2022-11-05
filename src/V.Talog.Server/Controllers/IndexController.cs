@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using V.Common.Extensions;
+using V.Talog.Server.Attributes;
 using V.Talog.Server.Models;
+using V.User.Attributes;
 
 namespace V.Talog.Server.Controllers
 {
@@ -17,8 +19,21 @@ namespace V.Talog.Server.Controllers
 
         [HttpPut]
         [Route("mapping")]
+        [JwtValidation]
+        [AdminRole]
         public bool UpdateMapping([FromBody] UpdateMappingRequest request)
         {
+            if (request.Mapping == null)
+            {
+                if (string.IsNullOrWhiteSpace(request.Key) || string.IsNullOrWhiteSpace(request.ValueType))
+                {
+                    return false;
+                }
+
+                request.Mapping = new Dictionary<string, string>();
+                request.Mapping.Add(request.Key, request.ValueType);
+            }
+
             var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
             var label = "tag_mapping";
             if (request.Type == 1)

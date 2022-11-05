@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 using Serilog.Events;
+using V.Common.Extensions;
 using V.Talog;
 using V.Talog.Server;
 using V.User.Extensions;
@@ -29,7 +30,19 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddTaloger(getMapping: taloger => new IndexMapping(taloger));
+builder.Services.AddTaloger(getMapping: taloger =>
+{
+    taloger.CreateJsonIndexer("stored_index")
+        .Tag("tag_mapping", "pg")
+        .Data(new Dictionary<string, string> { { "date", typeof(int).FullName } }.ToJson())
+        .Save();
+    taloger.CreateJsonIndexer("stored_index")
+        .Tag("tag_mapping", "metric")
+        .Data(new Dictionary<string, string> { { "date", typeof(int).FullName } }.ToJson())
+        .Save();
+
+    return new IndexMapping(taloger);
+});
 
 var app = builder.Build();
 
@@ -39,6 +52,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.Use(async (context, next) =>
+{
+    context.Request.EnableBuffering();
+    await next(context);
+});
 
 app.UseStaticFiles();
 
