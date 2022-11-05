@@ -108,11 +108,16 @@ let queryLogBody = {
                     fieldQuery: "${fieldQuery}"
                 },
                 adaptor: function (payload, response) {
+                    let count = 0;
+                    if (payload.data) {
+                        count = payload.data.length;
+                    }
+
                     return {
                         msg: payload.msg,
                         status: payload.code,
                         data: {
-                            count: payload.data.length,
+                            count: count,
                             rows: payload.data
                         }
                     };

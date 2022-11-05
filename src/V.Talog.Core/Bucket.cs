@@ -1,26 +1,17 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml.Linq;
 
 namespace V.Talog
 {
-    [ProtoContract]
     public class Bucket
     {
-        [ProtoMember(1)]
         public string Index { get; set; }
 
-        [ProtoMember(2)]
         public string Key { get; set; }
 
-        [ProtoMember(3)]
         public List<Tag> Tags { get; set; }
 
-        [ProtoMember(4)]
         public string File { get; set; }
 
         public Bucket() { }

@@ -1,22 +1,15 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace V.Talog
 {
-    [ProtoContract]
     public class Trie
     {
-        [ProtoMember(1)]
         public char Char { get; set; }
 
-        [ProtoMember(2)]
         public ConcurrentBag<Trie> Nodes { get; set; } = new ConcurrentBag<Trie>();
 
-        [ProtoMember(3)]
         public ConcurrentDictionary<string, Bucket> Buckets { get; set; } = new ConcurrentDictionary<string, Bucket>();
 
         public Trie() { }

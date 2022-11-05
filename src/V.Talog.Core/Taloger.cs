@@ -63,6 +63,8 @@ namespace V.Talog
             {
                 index.Dispose();
             }
+
+            Log.Information($"Taloger {this.GetHashCode()} disposed.");
         }
 
         private void AutoSave()

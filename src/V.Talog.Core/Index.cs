@@ -1,4 +1,4 @@
-﻿using ProtoBuf;
+﻿using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Concurrent;
@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace V.Talog
 {
-    [ProtoContract]
     public class Index : IDisposable
     {
         private Config config;
@@ -17,14 +16,14 @@ namespace V.Talog
         private string unsavedLogsPath;
         private volatile ConcurrentBag<TaggedLog> unsavedLogs;
 
+        [JsonIgnore]
         public string Name { get; set; }
 
-        [ProtoMember(1)]
         public ConcurrentDictionary<string, Trie> Tries { get; set; }
 
-        [ProtoMember(2)]
         public ConcurrentDictionary<string, Bucket> Buckets { get; set; }
 
+        [JsonIgnore]
         public DateTime LastUsedTime { get; private set; } = DateTime.Now;
 
         public Index() { }
@@ -43,15 +42,12 @@ namespace V.Talog
                 Directory.CreateDirectory(folder);
             }
 
-            this.indexPath = Path.Combine(folder, "index");
+            this.indexPath = Path.Combine(folder, "index.json");
             if (File.Exists(this.indexPath))
             {
-                using (var file = File.OpenRead(this.indexPath))
-                {
-                    var idx = Serializer.Deserialize<Index>(file);
-                    this.Tries = idx.Tries;
-                    this.Buckets = idx.Buckets;
-                }
+                var idx = JsonConvert.DeserializeObject<Index>(File.ReadAllText(this.indexPath));
+                this.Tries = idx.Tries;
+                this.Buckets = idx.Buckets;
             }
             else
             {
@@ -59,14 +55,11 @@ namespace V.Talog
                 this.Buckets = new ConcurrentDictionary<string, Bucket>();
             }
 
-            this.unsavedLogsPath = Path.Combine(folder, "unsaved");
+            this.unsavedLogsPath = Path.Combine(folder, "unsaved.json");
             if (File.Exists(this.unsavedLogsPath))
             {
-                using (var file = File.OpenRead(this.unsavedLogsPath))
-                {
-                    var logs = Serializer.Deserialize<ConcurrentBag<TaggedLog>>(file);
-                    this.unsavedLogs = logs;
-                }
+                var logs = JsonConvert.DeserializeObject<ConcurrentBag<TaggedLog>>(File.ReadAllText(this.unsavedLogsPath));
+                this.unsavedLogs = logs;
             }
             else
             {
@@ -106,10 +99,7 @@ namespace V.Talog
             }
             lock (this)
             {
-                using (var file = File.OpenWrite(this.unsavedLogsPath))
-                {
-                    Serializer.Serialize(file, this.unsavedLogs);
-                }
+                File.WriteAllText(this.unsavedLogsPath, JsonConvert.SerializeObject(this.unsavedLogs));
             }
 
             this.PushWithNoGuarantee(tags, data);
@@ -188,6 +178,13 @@ namespace V.Talog
 
                 trie.RemoveBucket(tag.Value.ToCharArray(), key);
             }
+
+            try
+            {
+                File.Delete(bucket.File);
+            }
+            catch { }
+
             return true;
         }
 
@@ -195,10 +192,7 @@ namespace V.Talog
         {
             lock (this)
             {
-                using (var file = File.OpenWrite(this.indexPath))
-                {
-                    Serializer.Serialize(file, this);
-                }
+                File.WriteAllText(this.indexPath, JsonConvert.SerializeObject(this));
 
                 this.unsavedLogs = new ConcurrentBag<TaggedLog>();
 

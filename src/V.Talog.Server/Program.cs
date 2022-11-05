@@ -46,6 +46,12 @@ builder.Services.AddTaloger(getMapping: taloger =>
 
 var app = builder.Build();
 
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+    var taloger = app.Services.GetService<Taloger>();
+    taloger?.Dispose();
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
