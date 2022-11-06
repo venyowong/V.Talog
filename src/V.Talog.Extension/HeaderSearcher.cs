@@ -48,7 +48,9 @@ namespace V.Talog
                     var line = lines[i];
                     if (line.StartsWith(this.head))
                     {
+                        log.Data = log.Data.Substring(this.head.Length + 3);
                         result.Add(log);
+
                         log = new TaggedLog
                         {
                             Data = line,
@@ -60,6 +62,8 @@ namespace V.Talog
                         log.Data += $"\n{line}";
                     }
                 }
+
+                log.Data = log.Data.Substring(this.head.Length + 3);
                 result.Add(log);
             }
             return result;

@@ -99,28 +99,13 @@ let queryLogBody = {
             type: "crud",
             name: "logs",
             api: {
-                url: "./log/search",
+                url: "./log/search?page=${page}&perPage=${perPage}",
                 method: "POST",
                 data: {
                     index: "${index}",
                     tagQuery: "${tagQuery}",
                     regex: "${regex}",
                     fieldQuery: "${fieldQuery}"
-                },
-                adaptor: function (payload, response) {
-                    let count = 0;
-                    if (payload.data) {
-                        count = payload.data.length;
-                    }
-
-                    return {
-                        msg: payload.msg,
-                        status: payload.code,
-                        data: {
-                            count: count,
-                            rows: payload.data
-                        }
-                    };
                 }
             },
             mode: "list",
@@ -143,7 +128,8 @@ let queryLogBody = {
                         items: {
                             type: "tpl",
                             tpl: "<span class='label label-default m-l-sm'><%= data.value %>: <%= data.label %></span>"
-                        }
+                        },
+                        visibleOn: "${groups != null && groups != undefined}"
                     }
                 ]
             }

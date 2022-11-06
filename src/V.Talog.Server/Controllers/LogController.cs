@@ -24,6 +24,11 @@ namespace V.Talog.Server.Controllers
         [Route("index")]
         public bool Index([FromBody] IndexLogRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Head))
+            {
+                request.Head = request.Index;
+            }
+
             var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
             var query = new Query("name", request.Index);
             var json = storedIndexSearcher.SearchJsonLogs(query)
@@ -63,7 +68,10 @@ namespace V.Talog.Server.Controllers
                 indexer = this.taloger.CreateIndexer(request.Index);
             }
 
-            request.Tags.ForEach(t => indexer.Tag(t.Label, t.Value));
+            foreach (var tag in request.Tags)
+            {
+                indexer.Tag(tag.Key, tag.Value);
+            }
             indexer.Data(request.Data)
                 .Save();
             return true;
@@ -71,7 +79,7 @@ namespace V.Talog.Server.Controllers
 
         [HttpPost]
         [Route("search")]
-        public Result Search([FromBody] SearchLogRequest request)
+        public Result Search([FromBody] SearchLogRequest request, [FromQuery] int page, [FromQuery] int perPage)
         {
             var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
             var query = new Query("name", request.Index);
@@ -93,7 +101,7 @@ namespace V.Talog.Server.Controllers
             {
                 var searcher = this.taloger.CreateHeaderSearcher(request.Index, json["head"].ToString());
                 var logs = searcher.SearchLogs(tagQuery);
-                return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery);
+                return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage);
             }
             else
             {
@@ -120,7 +128,7 @@ namespace V.Talog.Server.Controllers
                         });
                     };
 
-                    return Result.Success(logs.Where(l =>
+                    logs = logs.Where(l =>
                     {
                         if (filter == null)
                         {
@@ -128,13 +136,20 @@ namespace V.Talog.Server.Controllers
                         }
 
                         return filter(l);
-                    }).ToList());
+                    }).ToList();
+                    return Result.Success(new
+                    {
+                        total = logs.Count,
+                        items = logs.Skip((page - 1) * perPage)
+                        .Take(perPage)
+                        .ToList()
+                    });
                 }
                 else
                 {
                     var searcher = this.taloger.CreateSearcher(request.Index);
                     var logs = searcher.SearchLogs(tagQuery);
-                    return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery);
+                    return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage);
                 }
             }
         }
@@ -154,7 +169,7 @@ namespace V.Talog.Server.Controllers
             };
         }
 
-        private Result HandleRegex(List<TaggedLog> logs, string index, string regex, string regexQuery)
+        private Result HandleRegex(List<TaggedLog> logs, string index, string regex, string regexQuery, int page, int perPage)
         {
             if (logs.IsNullOrEmpty())
             {
@@ -181,10 +196,23 @@ namespace V.Talog.Server.Controllers
                     };
                 }
 
-                return Result.Success(logs.SelectParsedLogs(regex, filter));
+                var parsedLogs = logs.SelectParsedLogs(regex, filter);
+                return Result.Success(new
+                {
+                    total = parsedLogs.Count,
+                    items = parsedLogs.Skip((page - 1) * perPage)
+                        .Take(perPage)
+                        .ToList()
+                });
             }
 
-            return Result.Success(logs);
+            return Result.Success(new
+            {
+                total = logs.Count,
+                items = logs.Skip((page - 1) * perPage)
+                        .Take(perPage)
+                        .ToList()
+            });
         }
     }
 }

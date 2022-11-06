@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 
 data
+src/V.Talog.Server/watching_files.json

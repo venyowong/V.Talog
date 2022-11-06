@@ -22,7 +22,7 @@ namespace V.Talog
         {
             foreach (var item in data)
             {
-                this.data.Add($"{this.head} {data}");
+                this.data.Add($"{this.head} {item}");
             }
             return this;
         }

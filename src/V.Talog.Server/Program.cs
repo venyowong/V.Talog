@@ -6,18 +6,19 @@ using V.Talog;
 using V.Talog.Server;
 using V.User.Extensions;
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .WriteTo.Console()
+    .WriteTo.File("log/log.txt", rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, config) =>
-{
-    config.MinimumLevel.Information()
-        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-        .MinimumLevel.Override("System", LogEventLevel.Warning)
-        .ReadFrom.Configuration(context.Configuration)
-        .Enrich.FromLogContext();
-});
-
 builder.Services.AddJwt(builder.Configuration["Jwt:Secret"]);
+
+builder.Services.AddHostedService<LogShipper>();
 
 // Add services to the container.
 

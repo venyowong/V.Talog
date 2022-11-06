@@ -15,6 +15,7 @@ namespace V.Talog
         private string indexPath;
         private string unsavedLogsPath;
         private volatile ConcurrentBag<TaggedLog> unsavedLogs;
+        private volatile bool needSave = false;
 
         [JsonIgnore]
         public string Name { get; set; }
@@ -45,7 +46,7 @@ namespace V.Talog
             this.indexPath = Path.Combine(folder, "index.json");
             if (File.Exists(this.indexPath))
             {
-                var idx = JsonConvert.DeserializeObject<Index>(File.ReadAllText(this.indexPath));
+                var idx = JsonConvert.DeserializeObject<Index>(File.ReadAllText(this.indexPath), new JsonSerializerSettings { MaxDepth = null });
                 this.Tries = idx.Tries;
                 this.Buckets = idx.Buckets;
             }
@@ -114,6 +115,7 @@ namespace V.Talog
         public void PushWithNoGuarantee(List<Tag> tags, params string[] data)
         {
             this.LastUsedTime = DateTime.Now;
+            this.needSave = true;
 
             var bucket = new Bucket(this.Name, tags, this.config);
             bucket.Append(data);
@@ -169,6 +171,8 @@ namespace V.Talog
                 return false;
             }
 
+            this.needSave = true;
+
             foreach (var tag in bucket.Tags)
             {
                 if (!this.Tries.TryGetValue(tag.Label, out var trie))
@@ -190,6 +194,11 @@ namespace V.Talog
 
         public void Save()
         {
+            if (!this.needSave)
+            {
+                return;
+            }
+
             lock (this)
             {
                 File.WriteAllText(this.indexPath, JsonConvert.SerializeObject(this));
@@ -200,6 +209,8 @@ namespace V.Talog
                 {
                     File.Delete(this.unsavedLogsPath);
                 }
+
+                this.needSave = false;
             }
         }
 

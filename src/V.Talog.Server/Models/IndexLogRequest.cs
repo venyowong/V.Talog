@@ -10,7 +10,7 @@ namespace V.Talog.Server.Models
 
         [Required]
         [MinLength(1)]
-        public List<Tag> Tags { get; set; }
+        public Dictionary<string, string> Tags { get; set; }
 
         [Required]
         [MinLength(1)]

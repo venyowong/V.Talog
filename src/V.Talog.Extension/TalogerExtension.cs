@@ -275,7 +275,7 @@ namespace V.Talog
                 }
 
                 // 再处理 or 运算
-                for (int i = 0; i < slen - 1; i++)
+                for (int i = 0; i < slen; i++)
                 {
                     if (expression.Symbols[i] != Symbol.Or)
                     {
@@ -285,7 +285,7 @@ namespace V.Talog
                     queries[i + 1] = queries[i].Or(queries[i + 1]);
                 }
 
-                return queries[slen - 1];
+                return queries[slen];
             }
         }
 
