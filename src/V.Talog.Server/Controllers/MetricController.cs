@@ -93,7 +93,7 @@ namespace V.Talog.Server.Controllers
             var query = new Query("index", index);
             var result = this.taloger.CreateJsonSearcher("pg")
                 .Search(query)
-                .Select(b => b.Tags.FirstOrDefault(t => t.Label == "page"))
+                ?.Select(b => b.Tags.FirstOrDefault(t => t.Label == "page"))
                 .Where(t => t != null)
                 .Select(t => t.Value)
                 .Distinct();
@@ -247,7 +247,7 @@ namespace V.Talog.Server.Controllers
             var query = new Query("index", index);
             var result = this.taloger.CreateJsonSearcher("metric")
                 .Search(query)
-                .Select(b => b.Tags.FirstOrDefault(t => t.Label == "name"))
+                ?.Select(b => b.Tags.FirstOrDefault(t => t.Label == "name"))
                 .Where(t => t != null)
                 .Select(t => t.Value)
                 .Distinct();
