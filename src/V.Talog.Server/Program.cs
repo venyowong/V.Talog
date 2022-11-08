@@ -45,6 +45,18 @@ builder.Services.AddTaloger(getMapping: taloger =>
     return new IndexMapping(taloger);
 });
 
+var origins = builder.Configuration["Cors:Origins"];
+if (!string.IsNullOrWhiteSpace(origins))
+{
+    builder.Services.AddCors(o => o.AddPolicy("Default", b =>
+    {
+        b.WithOrigins(origins.Split(';'))
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    }));
+}
+
 var app = builder.Build();
 
 app.Lifetime.ApplicationStopping.Register(() =>
@@ -65,6 +77,11 @@ app.Use(async (context, next) =>
     context.Request.EnableBuffering();
     await next(context);
 });
+
+if (!string.IsNullOrWhiteSpace(origins))
+{ 
+    app.UseCors("Default");
+}
 
 app.UseStaticFiles();
 
