@@ -28,7 +28,14 @@
             format: "YYYY-MM-DD"
         },
         {
+            type: "button",
+            label: "刷新",
+            actionType: "reload",
+            target: "metricSparkline"
+        },
+        {
             type: "chart",
+            name: "metricSparkline",
             initFetch: false,
             api: "./metric/sparkline?index=${index}&name=${name}&begin=${begin}&end=${end}&token=" + token,
             config: {

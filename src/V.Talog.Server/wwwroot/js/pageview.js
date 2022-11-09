@@ -28,7 +28,14 @@
             format: "YYYY-MM-DD"
         },
         {
+            type: "button",
+            label: "刷新",
+            actionType: "reload",
+            target: "latestPageView,pageViewSparkline"
+        },
+        {
             type: "service",
+            name: "latestPageView",
             initFetch: false,
             api: "./metric/pg/latest?index=${index}&page=${page}&token=" + token,
             body: [
@@ -66,6 +73,7 @@
         },
         {
             type: "chart",
+            name: "pageViewSparkline",
             initFetch: false,
             api: "./metric/pg/sparkline?index=${index}&page=${page}&begin=${begin}&end=${end}&token=" + token,
             config: {
