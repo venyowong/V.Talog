@@ -29,8 +29,6 @@ namespace V.Talog.Server
                 section.Bind(this.logs);
             }
 
-            this.logs.ForEach(x => x.Path = x.Path.ToLower());
-
             if (File.Exists(_watchingFileName))
             {
                 this.files = JsonConvert.DeserializeObject<ConcurrentDictionary<string, LogFile>>(File.ReadAllText(_watchingFileName));
@@ -222,7 +220,11 @@ namespace V.Talog.Server
             var (content, offset) = logFile.ReadIncrement();
             if (!string.IsNullOrWhiteSpace(content))
             {
-                var config = this.logs.FirstOrDefault(x => path.StartsWith(x.Path));
+                var config = this.logs.FirstOrDefault(x =>
+                {
+                    var files = Directory.GetFiles(x.Path, x.Filter, SearchOption.AllDirectories);
+                    return files.Any(f => f.ToLower() == path);
+                });
                 if (config != null)
                 {
                     if (this.IndexLogs(content, path, config))
