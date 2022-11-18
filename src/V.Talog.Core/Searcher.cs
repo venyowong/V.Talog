@@ -58,6 +58,18 @@ namespace V.Talog
             return leftBuckets.Union(rightBuckets).ToList();
         }
 
+        public void Remove(Query query)
+        {
+            var buckets = this.Search(query);
+            if (buckets == null || !buckets.Any())
+            {
+                return;
+            }
+
+            buckets.ForEach(b => this.index.RemoveBucket(b.Key));
+            return;
+        }
+
         public virtual List<TaggedLog> SearchLogs(Query query)
         {
             var buckets = this.Search(query);

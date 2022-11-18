@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -53,6 +54,22 @@ namespace V.Talog
             result = new Index(index, this.Config);
             this.indexes.TryAdd(index, result);
             return result;
+        }
+
+        public void RemoveIndex(string index)
+        {
+            var folder = Path.Combine(this.Config.DataPath, index);
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
+            if (!this.indexes.TryRemove(index, out var idx))
+            {
+                return;
+            }
+
+            idx.Dispose();
+            Directory.Delete(folder, true);
         }
 
         public void Dispose()

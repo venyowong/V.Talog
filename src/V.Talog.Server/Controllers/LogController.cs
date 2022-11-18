@@ -169,6 +169,38 @@ namespace V.Talog.Server.Controllers
             };
         }
 
+        /// <summary>
+        /// 删除日志
+        /// <para>只有 TagQuery 生效</para>
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("remove")]
+        [JwtValidation]
+        [AdminRole]
+        public Result Remove([FromBody] SearchLogRequest request)
+        {
+            var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
+            var query = new Query("name", request.Index);
+            var json = storedIndexSearcher.SearchJsonLogs(query)
+                ?.Select(x => x.Data)
+                .LastOrDefault();
+            if (json == null)
+            {
+                return new Result { Msg = "删除成功" };
+            }
+            var tagQuery = this.taloger.CreateQueryByExpression(request.Index, request.TagQuery);
+            if (tagQuery == null)
+            {
+                return new Result { Code = -1, Msg = $"{request.TagQuery} 解析失败，请检查表达式" };
+            }
+
+            this.taloger.CreateSearcher(request.Index)
+                .Remove(query);
+            return new Result { Msg = "删除成功" };
+        }
+
         private Result HandleRegex(List<TaggedLog> logs, string index, string regex, string regexQuery, int page, int perPage)
         {
             if (logs.IsNullOrEmpty())

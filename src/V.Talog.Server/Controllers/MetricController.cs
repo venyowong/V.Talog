@@ -8,7 +8,6 @@ using V.Common.Extensions;
 using V.Talog.Server.Attributes;
 using V.Talog.Server.Models;
 using V.User.Attributes;
-using V.User.Models;
 
 namespace V.Talog.Server.Controllers
 {
@@ -73,6 +72,28 @@ namespace V.Talog.Server.Controllers
                 msg = string.Empty,
                 data = result
             };
+        }
+
+        /// <summary>
+        /// 删除 index
+        /// </summary>
+        /// <param name="type">0 PageView 1 Metric</param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("index/delete")]
+        [JwtValidation]
+        [AdminRole]
+        public Result DeleteIndex(int type, string index)
+        {
+            var idx = "pg";
+            if (type == 1)
+            {
+                idx = "metric";
+            }
+            this.taloger.CreateSearcher(idx)
+                .Remove(new Query("index", index));
+            return new Result { Msg = "删除成功" };
         }
 
         [HttpGet]

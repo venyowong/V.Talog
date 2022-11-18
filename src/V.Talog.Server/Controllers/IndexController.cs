@@ -21,13 +21,13 @@ namespace V.Talog.Server.Controllers
         [Route("mapping")]
         [JwtValidation]
         [AdminRole]
-        public bool UpdateMapping([FromBody] UpdateMappingRequest request)
+        public Result UpdateMapping([FromBody] UpdateMappingRequest request)
         {
             if (request.Mapping == null)
             {
                 if (string.IsNullOrWhiteSpace(request.Key) || string.IsNullOrWhiteSpace(request.ValueType))
                 {
-                    return false;
+                    return new Result { Code = -1, Msg = "参数不合法" };
                 }
 
                 request.Mapping = new Dictionary<string, string>();
@@ -59,7 +59,17 @@ namespace V.Talog.Server.Controllers
                 .Tag(label, request.Index)
                 .Data(mapping.ToJson())
                 .Save();
-            return true;
+            return new Result { Msg = "设置成功" };
+        }
+
+        [HttpPost]
+        [Route("remove")]
+        [JwtValidation]
+        [AdminRole]
+        public Result RemoveIndex(string index)
+        {
+            this.taloger.RemoveIndex(index);
+            return new Result { Msg = "删除成功" };
         }
 
         private string GetTypeName(string type)

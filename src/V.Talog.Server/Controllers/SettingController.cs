@@ -85,18 +85,8 @@ namespace V.Talog.Server.Controllers
         [AdminRole]
         public bool DeleteQueryName(string name)
         {
-            var buckets = this.taloger.CreateJsonSearcher("setting")
-                    .Search(new Query("query", name));
-            if (buckets.IsNullOrEmpty())
-            {
-                return true;
-            }
-
-            var index = this.taloger.GetIndex("setting");
-            foreach (var bucket in buckets)
-            {
-                index.RemoveBucket(bucket.Key);
-            }
+            this.taloger.CreateJsonSearcher("setting")
+                    .Remove(new Query("query", name));
             return true;
         }
     }
