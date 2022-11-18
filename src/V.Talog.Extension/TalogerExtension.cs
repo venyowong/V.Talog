@@ -113,13 +113,15 @@ namespace V.Talog
                     case Symbol.Neq:
                         return !value.Equals(value2);
                     case Symbol.Gt:
-                        return ((dynamic)value2).CompareTo((dynamic)value) > 0;
+                        return ((dynamic)value).CompareTo((dynamic)value2) > 0;
                     case Symbol.Gte:
-                        return ((dynamic)value2).CompareTo((dynamic)value) >= 0;
+                        return ((dynamic)value).CompareTo((dynamic)value2) >= 0;
                     case Symbol.Lt:
-                        return ((dynamic)value2).CompareTo((dynamic)value) < 0;
+                        return ((dynamic)value).CompareTo((dynamic)value2) < 0;
                     case Symbol.Lte:
-                        return ((dynamic)value2).CompareTo((dynamic)value) <= 0;
+                        return ((dynamic)value).CompareTo((dynamic)value2) <= 0;
+                    case Symbol.Like:
+                        return value.ToString().Contains(value2.ToString());
                     default:
                         return false;
                 }
@@ -226,6 +228,8 @@ namespace V.Talog
                         return BuildTagQuery(index, expression.Key, expression.Value, (v1, v2) => ((dynamic)v1).CompareTo((dynamic)v2) < 0);
                     case Symbol.Lte:
                         return BuildTagQuery(index, expression.Key, expression.Value, (v1, v2) => ((dynamic)v1).CompareTo((dynamic)v2) <= 0);
+                    case Symbol.Like:
+                        return BuildTagQuery(index, expression.Key, expression.Value, (v1, v2) => v1.ToString().Contains(v2.ToString()));
                     default:
                         return null;
                 }

@@ -4,6 +4,7 @@ using Serilog.Events;
 using V.Common.Extensions;
 using V.Talog;
 using V.Talog.Server;
+using V.Talog.Server.Middlewares;
 using V.User.Extensions;
 
 Log.Logger = new LoggerConfiguration()
@@ -77,6 +78,8 @@ app.Use(async (context, next) =>
     context.Request.EnableBuffering();
     await next(context);
 });
+
+app.UseMiddleware<LogMiddleware>();
 
 if (!string.IsNullOrWhiteSpace(origins))
 { 
