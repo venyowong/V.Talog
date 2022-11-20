@@ -88,6 +88,39 @@ let queryLogBody = {
                 },
                 {
                     type: "button",
+                    label: "删除日志",
+                    level: "danger",
+                    actionType: "dialog",
+                    dialog: {
+                      title: "确认",
+                      body: "是否确认删除日志？",
+                      actions: [
+                        {
+                          type: "button",
+                          label: "取消",
+                          actionType: "close"
+                        },
+                        {
+                          type: "button",
+                          label: "确认",
+                          level: "primary",
+                          actionType: "ajax",
+                          close: true,
+                          api: {
+                            method: "POST",
+                            url: "./log/remove",
+                            data: {
+                              index: "${index}",
+                              tagQuery: "${tagQuery}",
+                              token: token
+                            }
+                          }
+                        }
+                      ]
+                    }
+                },
+                {
+                    type: "button",
                     label: "查询",
                     level: "primary",
                     actionType: "reload",

@@ -86,6 +86,7 @@ if (!string.IsNullOrWhiteSpace(origins))
     app.UseCors("Default");
 }
 
+app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseForwardedHeaders();

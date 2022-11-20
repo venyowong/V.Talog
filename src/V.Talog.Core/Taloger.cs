@@ -63,12 +63,11 @@ namespace V.Talog
             {
                 return;
             }
-            if (!this.indexes.TryRemove(index, out var idx))
-            {
-                return;
-            }
 
-            idx.Dispose();
+            if (this.indexes.TryRemove(index, out var idx))
+            {
+                idx.Dispose();
+            }
             Directory.Delete(folder, true);
         }
 

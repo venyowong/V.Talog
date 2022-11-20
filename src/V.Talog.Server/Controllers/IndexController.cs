@@ -68,6 +68,8 @@ namespace V.Talog.Server.Controllers
         [AdminRole]
         public Result RemoveIndex(string index)
         {
+            this.taloger.CreateSearcher("stored_index")
+                .Remove(new Query("name", index));
             this.taloger.RemoveIndex(index);
             return new Result { Msg = "删除成功" };
         }

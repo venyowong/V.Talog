@@ -197,7 +197,7 @@ namespace V.Talog.Server.Controllers
             }
 
             this.taloger.CreateSearcher(request.Index)
-                .Remove(query);
+                .Remove(tagQuery);
             return new Result { Msg = "删除成功" };
         }
 
