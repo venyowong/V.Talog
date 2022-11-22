@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using V.Common.Extensions;
 using V.Talog.Server.Attributes;
 using V.Talog.Server.Models;
@@ -8,7 +9,7 @@ namespace V.Talog.Server.Controllers
 {
     [ApiController]
     [Route("index")]
-    public class IndexController
+    public class IndexController : Controller
     {
         private Taloger taloger;
 
@@ -73,6 +74,12 @@ namespace V.Talog.Server.Controllers
             this.taloger.RemoveIndex(index);
             return new Result { Msg = "删除成功" };
         }
+
+        [HttpGet]
+        [Route("suggest")]
+        [JwtValidation]
+        [AdminRole]
+        public ActionResult Suggest() => this.Content(JsonConvert.SerializeObject(this.taloger.Suggest(), Formatting.Indented), "application/json");
 
         private string GetTypeName(string type)
         {

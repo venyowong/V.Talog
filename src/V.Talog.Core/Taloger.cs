@@ -71,6 +71,35 @@ namespace V.Talog
             Directory.Delete(folder, true);
         }
 
+        public Suggestion Suggest()
+        {
+            var largeBuckets = new Dictionary<string, List<Bucket>>();
+            foreach (var folder in Directory.GetDirectories(this.Config.DataPath))
+            {
+                var index = this.GetIndex(folder.Split('/', '\\').Last());
+                var buckets = new List<Bucket>();
+                foreach (var bucket in index.Buckets.Values)
+                {
+                    var file = new FileInfo(bucket.File);
+                    var size = file.Length / 1024 / 1024;
+                    if (file.Length > 5)
+                    {
+                        buckets.Add(bucket);
+                    }
+                }
+                
+                if (buckets.Any())
+                {
+                    largeBuckets.Add(index.Name, buckets);
+                }
+            }
+
+            return new Suggestion
+            {
+                LargeBuckets = largeBuckets
+            };
+        }
+
         public void Dispose()
         {
             this.cancellation.Cancel();
