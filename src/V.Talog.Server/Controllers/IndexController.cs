@@ -79,7 +79,17 @@ namespace V.Talog.Server.Controllers
         [Route("suggest")]
         [JwtValidation]
         [AdminRole]
-        public ActionResult Suggest() => this.Content(JsonConvert.SerializeObject(this.taloger.Suggest(), Formatting.Indented), "application/json");
+        public object Suggest()
+        {
+            return new
+            {
+                status = 0,
+                data = new
+                {
+                    suggestion = this.taloger.Suggest()
+                }
+            };
+        }
 
         private string GetTypeName(string type)
         {

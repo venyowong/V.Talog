@@ -82,7 +82,7 @@ namespace V.Talog
                 {
                     var file = new FileInfo(bucket.File);
                     var size = file.Length / 1024 / 1024;
-                    if (file.Length > 5)
+                    if (size > 5)
                     {
                         buckets.Add(bucket);
                     }

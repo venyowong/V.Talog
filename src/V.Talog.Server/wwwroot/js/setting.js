@@ -70,6 +70,18 @@
           ],
           submitText: "删除",
           reload: "metricIndex"
+        },
+        {
+            title: "建议",
+            type: "form",
+            body: {
+                type: "service",
+                api: "./index/suggest?token=" + token,
+                body: {
+                    type: "json",
+                    source: "${suggestion}"
+                }
+            }
         }
     ]
 };
