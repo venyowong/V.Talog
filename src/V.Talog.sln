@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V.Talog.Client", "V.Talog.Client\V.Talog.Client.csproj", "{DF17F0E2-41D5-4018-A10D-627320C24B36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V.Talog.Extension.Serilog", "V.Talog.Extension.Serilog\V.Talog.Extension.Serilog.csproj", "{2ADA3AD7-799C-4F8F-BC8B-C06A3A71B1DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +42,14 @@ Global
 		{57EE208D-A17C-47E6-B9EC-00409FAA6682}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57EE208D-A17C-47E6-B9EC-00409FAA6682}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57EE208D-A17C-47E6-B9EC-00409FAA6682}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF17F0E2-41D5-4018-A10D-627320C24B36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF17F0E2-41D5-4018-A10D-627320C24B36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF17F0E2-41D5-4018-A10D-627320C24B36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF17F0E2-41D5-4018-A10D-627320C24B36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2ADA3AD7-799C-4F8F-BC8B-C06A3A71B1DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ADA3AD7-799C-4F8F-BC8B-C06A3A71B1DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ADA3AD7-799C-4F8F-BC8B-C06A3A71B1DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ADA3AD7-799C-4F8F-BC8B-C06A3A71B1DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

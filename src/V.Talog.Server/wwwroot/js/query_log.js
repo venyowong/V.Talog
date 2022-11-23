@@ -146,7 +146,10 @@ let queryLogBody = {
             initFetch: false,
             listItem: {
                 "body": [
-                    "${data}",
+                    {
+                        type: "json",
+                        source: "${data}"
+                    },
                     {
                         type: "each",
                         source: "${tags}",

@@ -108,7 +108,7 @@ namespace V.Talog.Server.Controllers
                 if (!string.IsNullOrWhiteSpace(request.FieldQuery) && string.IsNullOrWhiteSpace(request.Regex))
                 {
                     var searcher = this.taloger.CreateJsonSearcher(request.Index);
-                    var logs = searcher.SearchJsonLogs(query);
+                    var logs = searcher.SearchJsonLogs(tagQuery);
                     if (logs.IsNullOrEmpty())
                     {
                         return Result.Success(logs);
@@ -119,12 +119,7 @@ namespace V.Talog.Server.Controllers
                     {
                         return jsonQuery.Execute(request.Index, name =>
                         {
-                            if (!log.Data.ContainsKey(name))
-                            {
-                                return null;
-                            }
-
-                            return log.Data[name].ToString();
+                            return this.GetValue(log.Data, name.Split('.'))?.ToString();
                         });
                     };
 
@@ -245,6 +240,20 @@ namespace V.Talog.Server.Controllers
                         .Take(perPage)
                         .ToList()
             });
+        }
+
+        private JToken GetValue(JToken obj, string[] fields, int index = 0)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+            if (index == fields.Length - 1)
+            {
+                return obj[fields[index]];
+            }
+
+            return this.GetValue(obj[fields[index]], fields, index + 1);
         }
     }
 }

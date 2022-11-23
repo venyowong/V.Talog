@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Bogus" Version="34.0.2" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\V.Talog.Extension.Serilog\V.Talog.Extension.Serilog.csproj" />
     <ProjectReference Include="..\V.Talog.Extension\V.Talog.Extension.csproj" />
   </ItemGroup>
 
