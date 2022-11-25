@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.HttpOverrides;
+using Quartz.Spi;
 using Serilog;
 using Serilog.Events;
 using V.Common.Extensions;
@@ -23,6 +24,7 @@ builder.Services.AddJwt(builder.Configuration["Jwt:Secret"]);
 
 builder.Services.AddHostedService<LogShipper>()
     .AddHostedService<QuartzHostedService>()
+    .AddSingleton<IJobFactory, CustomJobFactory>()
     .AddTransientBothTypes<IScheduledJob, AutoCleanJob>();
 
 // Add services to the container.
@@ -48,6 +50,9 @@ builder.Services.AddTalogger(getMapping: talogger =>
         .Save();
 
     return new IndexMapping(talogger);
+}, config: c =>
+{
+    c.IdleIndexInterval = 60;
 });
 
 var origins = builder.Configuration["Cors:Origins"];

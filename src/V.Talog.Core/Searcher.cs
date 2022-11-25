@@ -17,6 +17,10 @@ namespace V.Talog
 
         public List<Bucket> Search(Query query)
         {
+            if (query == null)
+            {
+                return null;
+            }
             if (query.Tag != null)
             {
                 var buckets = this.index.GetBuckets(query.Tag);
