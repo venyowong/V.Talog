@@ -4,7 +4,7 @@ using V.Talog;
 using V.Talog.Client;
 using V.Talog.Extension.Serilog;
 
-V.Talog.Client.Config.TalogServer = "http://localhost:7166";
+V.Talog.Client.Config.TalogServer = "https://vbranch.cn/talog";
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithThreadId()
     .MinimumLevel.Information()
@@ -12,7 +12,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Talog(new LogChannel("test2"))
     .CreateLogger();
 
-using var taloger = new Taloger();
+using var talogger = new Talogger();
 var logs = new Faker<V.Talog.Test.Log>()
     .RuleFor(l => l.Time, f => f.Date.Past())
     .RuleFor(l => l.Level, f => f.Random.Int(0, 2))
@@ -30,7 +30,7 @@ foreach (var i in Enumerable.Range(0, 20))
 //foreach (var i in Enumerable.Range(0, 20))
 //{
 //    var log = logs.Generate();
-//    taloger.CreateHeaderIndexer("log3")
+//    talogger.CreateHeaderIndexer("log3")
 //        .Tag("date", log.Time.Date.ToString())
 //        .Tag("level", log.Level.ToString())
 //        .Tag("ip", log.IP)
@@ -41,7 +41,7 @@ foreach (var i in Enumerable.Range(0, 20))
 //foreach (var i in Enumerable.Range(0, 20))
 //{
 //    var log = logs.Generate();
-//    taloger.CreateHeaderIndexer("log3")
+//    talogger.CreateHeaderIndexer("log3")
 //        .Tag("date", log.Time.Date.ToString())
 //        .Tag("level", log.Level.ToString())
 //        .Tag("userid", log.UserId)
@@ -51,11 +51,11 @@ foreach (var i in Enumerable.Range(0, 20))
 //}
 
 //var query = new Query("level", "0");
-//var logList = taloger.CreateHeaderSearcher("log3")
+//var logList = talogger.CreateHeaderSearcher("log3")
 //    .SearchLogs(query);
 //Console.WriteLine(logList.Count);
 //query = new Query("level", "0").Not();
-//logList = taloger.CreateHeaderSearcher("log3")
+//logList = talogger.CreateHeaderSearcher("log3")
 //    .SearchLogs(query);
 //Console.WriteLine(logList.Count);
 

@@ -15,11 +15,11 @@ namespace V.Talog.Server.Controllers
     [Route("metric")]
     public class MetricController : Controller
     {
-        private Taloger taloger;
+        private Talogger talogger;
 
-        public MetricController(Taloger taloger)
+        public MetricController(Talogger talogger)
         {
-            this.taloger = taloger;
+            this.talogger = talogger;
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace V.Talog.Server.Controllers
         [Route("pg/add")]
         public bool AddPageView([Required] string index, [Required] string page, string user = null)
         {
-            var indexer = this.taloger.CreateJsonIndexer("pg");
+            var indexer = this.talogger.CreateJsonIndexer("pg");
             indexer.Tag("index", index)
                 .Tag("page", page)
                 .Tag("date", DateTime.Now.ToString("yyyyMMdd"));
@@ -65,7 +65,7 @@ namespace V.Talog.Server.Controllers
             {
                 index = "metric";
             }
-            var result = this.taloger.GetIndex(index).GetTagValues("index");
+            var result = this.talogger.GetIndex(index).GetTagValues("index");
             return new
             {
                 status = 0,
@@ -91,7 +91,7 @@ namespace V.Talog.Server.Controllers
             {
                 idx = "metric";
             }
-            this.taloger.CreateSearcher(idx)
+            this.talogger.CreateSearcher(idx)
                 .Remove(new Query("index", index));
             return new Result { Msg = "删除成功" };
         }
@@ -112,7 +112,7 @@ namespace V.Talog.Server.Controllers
             }
 
             var query = new Query("index", index);
-            var result = this.taloger.CreateJsonSearcher("pg")
+            var result = this.talogger.CreateJsonSearcher("pg")
                 .Search(query)
                 ?.Select(b => b.Tags.FirstOrDefault(t => t.Label == "page"))
                 .Where(t => t != null)
@@ -143,7 +143,7 @@ namespace V.Talog.Server.Controllers
 
             var query = new Query("index", index)
                 .And("page", page);
-            var logs = this.taloger.CreateJsonSearcher("pg")
+            var logs = this.talogger.CreateJsonSearcher("pg")
                 .SearchJsonLogs<PageView>(query);
             if (logs.IsNullOrEmpty())
             {
@@ -192,8 +192,8 @@ namespace V.Talog.Server.Controllers
                 };
             }
 
-            var query = this.taloger.CreateQueryByExpression("pg", $"index == {index} && page == {page} && date >= {begin.ToString("yyyyMMdd")} && date <= {end.ToString("yyyyMMdd")}");
-            var logs = this.taloger.CreateJsonSearcher("pg")
+            var query = this.talogger.CreateQueryByExpression("pg", $"index == {index} && page == {page} && date >= {begin.ToString("yyyyMMdd")} && date <= {end.ToString("yyyyMMdd")}");
+            var logs = this.talogger.CreateJsonSearcher("pg")
                 ?.SearchJsonLogs<PageView>(query);
             if (logs.IsNullOrEmpty())
             {
@@ -237,7 +237,7 @@ namespace V.Talog.Server.Controllers
         [Route("add")]
         public bool AddMetric([Required] string index, [Required] string name, decimal value)
         {
-            var indexer = this.taloger.CreateJsonIndexer("metric");
+            var indexer = this.talogger.CreateJsonIndexer("metric");
             indexer.Tag("index", index)
                 .Tag("name", name)
                 .Tag("date", DateTime.Now.ToString("yyyyMMdd"));
@@ -266,7 +266,7 @@ namespace V.Talog.Server.Controllers
             }
 
             var query = new Query("index", index);
-            var result = this.taloger.CreateJsonSearcher("metric")
+            var result = this.talogger.CreateJsonSearcher("metric")
                 .Search(query)
                 ?.Select(b => b.Tags.FirstOrDefault(t => t.Label == "name"))
                 .Where(t => t != null)
@@ -295,8 +295,8 @@ namespace V.Talog.Server.Controllers
                 };
             }
 
-            var query = this.taloger.CreateQueryByExpression("metric", $"index == {index} && name == {name} && date >= {begin.ToString("yyyyMMdd")} && date <= {end.ToString("yyyyMMdd")}");
-            var logs = this.taloger.CreateJsonSearcher("metric")
+            var query = this.talogger.CreateQueryByExpression("metric", $"index == {index} && name == {name} && date >= {begin.ToString("yyyyMMdd")} && date <= {end.ToString("yyyyMMdd")}");
+            var logs = this.talogger.CreateJsonSearcher("metric")
                 ?.SearchJsonLogs<Metric>(query);
             if (logs.IsNullOrEmpty())
             {

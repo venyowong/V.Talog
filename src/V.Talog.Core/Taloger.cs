@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace V.Talog
 {
-    public class Taloger : IDisposable
+    public class Talogger : IDisposable
     {
         private ConcurrentDictionary<string, Index> indexes = new ConcurrentDictionary<string, Index>();
 
@@ -18,9 +18,9 @@ namespace V.Talog
 
         private CancellationTokenSource cancellation = new CancellationTokenSource();
 
-        public Taloger()
+        public Talogger()
         {
-            Log.Information($"Taloger {this.GetHashCode()} init.");
+            Log.Information($"Talogger {this.GetHashCode()} init.");
             Task.Run(this.AutoSave, this.cancellation.Token);
         }
 
@@ -109,7 +109,7 @@ namespace V.Talog
                 index.Dispose();
             }
 
-            Log.Information($"Taloger {this.GetHashCode()} disposed.");
+            Log.Information($"Talogger {this.GetHashCode()} disposed.");
         }
 
         private void AutoSave()
@@ -121,7 +121,7 @@ namespace V.Talog
                     return;
                 }
 
-                Log.Debug($"Taloger {this.GetHashCode()} auto save.");
+                Log.Debug($"Talogger {this.GetHashCode()} auto save.");
                 var now = DateTime.Now;
                 var keys = this.indexes.Keys.ToList();
                 foreach (var key in keys)
@@ -145,7 +145,7 @@ namespace V.Talog
                     }
                 }
 
-                Thread.Sleep(this.Config.TalogerAutoSaveInterval);
+                Thread.Sleep(this.Config.TaloggerAutoSaveInterval);
             }
         }
     }

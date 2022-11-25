@@ -18,11 +18,11 @@ namespace V.Talog.Server
         private CancellationToken token;
         private Task task;
         private volatile bool needSave = false;
-        private Taloger taloger;
+        private Talogger talogger;
 
-        public LogShipper(IConfiguration config, Taloger taloger)
+        public LogShipper(IConfiguration config, Talogger talogger)
         {
-            this.taloger = taloger;
+            this.talogger = talogger;
             var section = config.GetSection("Logs");
             if (section != null)
             {
@@ -67,13 +67,13 @@ namespace V.Talog.Server
                 }
 
                 // 初始化 index
-                var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
+                var storedIndexSearcher = this.talogger.CreateJsonSearcher("stored_index");
                 var json = storedIndexSearcher.SearchJsonLogs(new Query("name", x.Index))
                     ?.Select(x => x.Data)
                     .FirstOrDefault();
                 if (json == null)
                 {
-                    this.taloger.CreateJsonIndexer("stored_index")
+                    this.talogger.CreateJsonIndexer("stored_index")
                         .Tag("name", x.Index)
                         .Data(JsonConvert.SerializeObject(new
                         {
@@ -283,11 +283,11 @@ namespace V.Talog.Server
                 Indexer indexer;
                 if (config.Type == 1)
                 {
-                    indexer = this.taloger.CreateHeaderIndexer(config.Index, config.Head);
+                    indexer = this.talogger.CreateHeaderIndexer(config.Index, config.Head);
                 }
                 else
                 {
-                    indexer = this.taloger.CreateIndexer(config.Index);
+                    indexer = this.talogger.CreateIndexer(config.Index);
                 }
 
                 foreach (var tag in config.Tags)

@@ -13,11 +13,11 @@ namespace V.Talog.Server.Controllers
     [Route("setting")]
     public class SettingController : Controller
     {
-        private Taloger taloger;
+        private Talogger talogger;
 
-        public SettingController(Taloger taloger)
+        public SettingController(Talogger talogger)
         {
-            this.taloger = taloger;
+            this.talogger = talogger;
         }
 
         [JwtValidation]
@@ -26,7 +26,7 @@ namespace V.Talog.Server.Controllers
         [Route("savequery")]
         public object SaveQuery([FromBody] SaveQueryRequest request)
         {
-            var indexer = this.taloger.CreateJsonIndexer("setting");
+            var indexer = this.talogger.CreateJsonIndexer("setting");
             indexer.Tag("query", request.Name);
             indexer.Data(request)
                 .Save();
@@ -53,7 +53,7 @@ namespace V.Talog.Server.Controllers
             }
 
             var query = new Query("query", name);
-            var result = this.taloger.CreateJsonSearcher("setting")
+            var result = this.talogger.CreateJsonSearcher("setting")
                     .SearchJsonLogs<SaveQueryRequest>(query)
                     ?.LastOrDefault();
             return new
@@ -74,7 +74,7 @@ namespace V.Talog.Server.Controllers
             {
                 status = 0,
                 msg = string.Empty,
-                data = this.taloger.GetIndex("setting")
+                data = this.talogger.GetIndex("setting")
                     .GetTagValues("query")
             };
         }
@@ -85,7 +85,7 @@ namespace V.Talog.Server.Controllers
         [AdminRole]
         public bool DeleteQueryName(string name)
         {
-            this.taloger.CreateJsonSearcher("setting")
+            this.talogger.CreateJsonSearcher("setting")
                     .Remove(new Query("query", name));
             return true;
         }

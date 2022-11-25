@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 using Serilog.Events;
 using V.Common.Extensions;
+using V.Quartz;
 using V.Talog;
 using V.Talog.Server;
+using V.Talog.Server.Jobs;
 using V.Talog.Server.Middlewares;
 using V.User.Extensions;
 
@@ -19,7 +21,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddJwt(builder.Configuration["Jwt:Secret"]);
 
-builder.Services.AddHostedService<LogShipper>();
+builder.Services.AddHostedService<LogShipper>()
+    .AddHostedService<QuartzHostedService>()
+    .AddTransientBothTypes<IScheduledJob, AutoCleanJob>();
 
 // Add services to the container.
 
@@ -32,18 +36,18 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddTaloger(getMapping: taloger =>
+builder.Services.AddTalogger(getMapping: talogger =>
 {
-    taloger.CreateJsonIndexer("stored_index")
+    talogger.CreateJsonIndexer("stored_index")
         .Tag("tag_mapping", "pg")
         .Data(new Dictionary<string, string> { { "date", typeof(int).FullName } }.ToJson())
         .Save();
-    taloger.CreateJsonIndexer("stored_index")
+    talogger.CreateJsonIndexer("stored_index")
         .Tag("tag_mapping", "metric")
         .Data(new Dictionary<string, string> { { "date", typeof(int).FullName } }.ToJson())
         .Save();
 
-    return new IndexMapping(taloger);
+    return new IndexMapping(talogger);
 });
 
 var origins = builder.Configuration["Cors:Origins"];
@@ -62,8 +66,8 @@ var app = builder.Build();
 
 app.Lifetime.ApplicationStopping.Register(() =>
 {
-    var taloger = app.Services.GetService<Taloger>();
-    taloger?.Dispose();
+    var talogger = app.Services.GetService<Talogger>();
+    talogger?.Dispose();
 });
 
 // Configure the HTTP request pipeline.

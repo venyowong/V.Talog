@@ -11,11 +11,11 @@ namespace V.Talog.Server.Controllers
     [Route("index")]
     public class IndexController : Controller
     {
-        private Taloger taloger;
+        private Talogger talogger;
 
-        public IndexController(Taloger taloger)
+        public IndexController(Talogger talogger)
         {
-            this.taloger = taloger;
+            this.talogger = talogger;
         }
 
         [HttpPut]
@@ -35,7 +35,7 @@ namespace V.Talog.Server.Controllers
                 request.Mapping.Add(request.Key, request.ValueType);
             }
 
-            var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
+            var storedIndexSearcher = this.talogger.CreateJsonSearcher("stored_index");
             var label = "tag_mapping";
             if (request.Type == 1)
             {
@@ -56,7 +56,7 @@ namespace V.Talog.Server.Controllers
                 mapping[item.Key] = type;
             }
 
-            this.taloger.CreateJsonIndexer("stored_index")
+            this.talogger.CreateJsonIndexer("stored_index")
                 .Tag(label, request.Index)
                 .Data(mapping.ToJson())
                 .Save();
@@ -69,9 +69,9 @@ namespace V.Talog.Server.Controllers
         [AdminRole]
         public Result RemoveIndex(string index)
         {
-            this.taloger.CreateSearcher("stored_index")
+            this.talogger.CreateSearcher("stored_index")
                 .Remove(new Query("name", index));
-            this.taloger.RemoveIndex(index);
+            this.talogger.RemoveIndex(index);
             return new Result { Msg = "删除成功" };
         }
 
@@ -86,7 +86,7 @@ namespace V.Talog.Server.Controllers
                 status = 0,
                 data = new
                 {
-                    suggestion = this.taloger.Suggest()
+                    suggestion = this.talogger.Suggest()
                 }
             };
         }

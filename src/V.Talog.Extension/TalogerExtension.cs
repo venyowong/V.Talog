@@ -8,19 +8,19 @@ using V.QueryParser;
 
 namespace V.Talog
 {
-    public static class TalogerExtension
+    public static class TaloggerExtension
     {
         private static IIndexMapping _indexMapping = null;
 
         /// <summary>
         /// 创建 HeaderIndexer
         /// </summary>
-        /// <param name="taloger"></param>
+        /// <param name="talogger"></param>
         /// <param name="index"></param>
         /// <param name="head">若 head 为 null，则默认使用 index 作为 head</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static HeaderIndexer CreateHeaderIndexer(this Taloger taloger, string index, string head = null)
+        public static HeaderIndexer CreateHeaderIndexer(this Talogger talogger, string index, string head = null)
         {
             if (string.IsNullOrWhiteSpace(index))
             {
@@ -31,19 +31,19 @@ namespace V.Talog
             {
                 head = index;
             }
-            return new HeaderIndexer(head, taloger.GetIndex(index));
+            return new HeaderIndexer(head, talogger.GetIndex(index));
         }
 
         /// <summary>
         /// 创建 HeaderSearcher
         /// </summary>
-        /// <param name="taloger"></param>
+        /// <param name="talogger"></param>
         /// <param name="index"></param>
         /// <param name="head">若 head 为 null，则默认使用 index 作为 head</param>
         /// <param name="regex"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static HeaderSearcher CreateHeaderSearcher(this Taloger taloger, string index, string head = null)
+        public static HeaderSearcher CreateHeaderSearcher(this Talogger talogger, string index, string head = null)
         {
             if (string.IsNullOrWhiteSpace(index))
             {
@@ -54,38 +54,38 @@ namespace V.Talog
             {
                 head = index;
             }
-            return new HeaderSearcher(head, taloger.GetIndex(index));
+            return new HeaderSearcher(head, talogger.GetIndex(index));
         }
 
-        public static JsonIndexer CreateJsonIndexer(this Taloger taloger, string index)
+        public static JsonIndexer CreateJsonIndexer(this Talogger talogger, string index)
         {
             if (string.IsNullOrWhiteSpace(index))
             {
                 throw new ArgumentNullException("index");
             }
 
-            return new JsonIndexer(taloger.GetIndex(index));
+            return new JsonIndexer(talogger.GetIndex(index));
         }
 
-        public static JsonSearcher CreateJsonSearcher(this Taloger taloger, string index)
+        public static JsonSearcher CreateJsonSearcher(this Talogger talogger, string index)
         {
             if (string.IsNullOrWhiteSpace(index))
             {
                 throw new ArgumentNullException("index");
             }
 
-            return new JsonSearcher(taloger.GetIndex(index));
+            return new JsonSearcher(talogger.GetIndex(index));
         }
 
-        public static IServiceCollection AddTaloger(this IServiceCollection services, Action<Config> config = null, Func<Taloger, IIndexMapping> getMapping = null)
+        public static IServiceCollection AddTalogger(this IServiceCollection services, Action<Config> config = null, Func<Talogger, IIndexMapping> getMapping = null)
         {
-            var taloger = new Taloger();
-            _indexMapping = getMapping(taloger);
+            var talogger = new Talogger();
+            _indexMapping = getMapping(talogger);
             if (config != null)
             {
-                config(taloger.Config);
+                config(talogger.Config);
             }
-            services.AddSingleton(taloger);
+            services.AddSingleton(talogger);
             return services;
         }
 
@@ -93,7 +93,7 @@ namespace V.Talog
         {
             if (_indexMapping == null)
             {
-                throw new ArgumentNullException("IIndexMapping", "Taloger 未配置 IIndexMapping，无法使用 RegexQuery、JsonQuery");
+                throw new ArgumentNullException("IIndexMapping", "Talogger 未配置 IIndexMapping，无法使用 RegexQuery、JsonQuery");
             }
 
             if (query.Type == QueryType.Base)
@@ -199,14 +199,14 @@ namespace V.Talog
         /// <summary>
         /// 根据查询表达式构建 Query
         /// </summary>
-        /// <param name="taloger"></param>
+        /// <param name="talogger"></param>
         /// <param name="index"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public static Query CreateQueryByExpression(this Taloger taloger, string index, string expression)
+        public static Query CreateQueryByExpression(this Talogger talogger, string index, string expression)
         {
             var queryExpression = new QueryExpression(expression);
-            var idx = taloger.GetIndex(index);
+            var idx = talogger.GetIndex(index);
             return BuildQuery(queryExpression, idx);
         }
 
@@ -297,7 +297,7 @@ namespace V.Talog
         {
             if (_indexMapping == null)
             {
-                throw new ArgumentNullException("IIndexMapping", "Taloger 未配置 IIndexMapping，无法对 Tag 使用 >、>=、<、<=");
+                throw new ArgumentNullException("IIndexMapping", "Talogger 未配置 IIndexMapping，无法对 Tag 使用 >、>=、<、<=");
             }
 
             var type = _indexMapping.GetTagType(index.Name, key);

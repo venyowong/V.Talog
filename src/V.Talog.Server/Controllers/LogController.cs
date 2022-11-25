@@ -13,11 +13,11 @@ namespace V.Talog.Server.Controllers
     [Route("log")]
     public class LogController
     {
-        private Taloger taloger;
+        private Talogger talogger;
 
-        public LogController(Taloger taloger)
+        public LogController(Talogger talogger)
         {
-            this.taloger = taloger;
+            this.talogger = talogger;
         }
 
         [HttpPost]
@@ -29,7 +29,7 @@ namespace V.Talog.Server.Controllers
                 request.Head = request.Index;
             }
 
-            var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
+            var storedIndexSearcher = this.talogger.CreateJsonSearcher("stored_index");
             var query = new Query("name", request.Index);
             var json = storedIndexSearcher.SearchJsonLogs(query)
                 ?.Select(x => x.Data)
@@ -47,7 +47,7 @@ namespace V.Talog.Server.Controllers
             }
             else
             {
-                this.taloger.CreateJsonIndexer("stored_index")
+                this.talogger.CreateJsonIndexer("stored_index")
                     .Tag("name", request.Index)
                     .Data(JsonConvert.SerializeObject(new
                     {
@@ -61,11 +61,11 @@ namespace V.Talog.Server.Controllers
             Indexer indexer;
             if (request.Type == 1)
             {
-                indexer = this.taloger.CreateHeaderIndexer(request.Index, request.Head);
+                indexer = this.talogger.CreateHeaderIndexer(request.Index, request.Head);
             }
             else
             {
-                indexer = this.taloger.CreateIndexer(request.Index);
+                indexer = this.talogger.CreateIndexer(request.Index);
             }
 
             foreach (var tag in request.Tags)
@@ -81,7 +81,7 @@ namespace V.Talog.Server.Controllers
         [Route("search")]
         public Result Search([FromBody] SearchLogRequest request, [FromQuery] int page, [FromQuery] int perPage)
         {
-            var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
+            var storedIndexSearcher = this.talogger.CreateJsonSearcher("stored_index");
             var query = new Query("name", request.Index);
             var json = storedIndexSearcher.SearchJsonLogs(query)
                 ?.Select(x => x.Data)
@@ -91,7 +91,7 @@ namespace V.Talog.Server.Controllers
                 return new Result { Code = -1, Msg = $"index {request.Index} 不存在，请先插入数据" };
             }
 
-            var tagQuery = this.taloger.CreateQueryByExpression(request.Index, request.TagQuery);
+            var tagQuery = this.talogger.CreateQueryByExpression(request.Index, request.TagQuery);
             if (tagQuery == null)
             {
                 return new Result { Code = -1, Msg = $"{request.TagQuery} 解析失败，请检查表达式" };
@@ -99,7 +99,7 @@ namespace V.Talog.Server.Controllers
 
             if (json["type"].ToString() == "1")
             {
-                var searcher = this.taloger.CreateHeaderSearcher(request.Index, json["head"].ToString());
+                var searcher = this.talogger.CreateHeaderSearcher(request.Index, json["head"].ToString());
                 var logs = searcher.SearchLogs(tagQuery);
                 return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage);
             }
@@ -107,7 +107,7 @@ namespace V.Talog.Server.Controllers
             {
                 if (!string.IsNullOrWhiteSpace(request.FieldQuery) && string.IsNullOrWhiteSpace(request.Regex))
                 {
-                    var searcher = this.taloger.CreateJsonSearcher(request.Index);
+                    var searcher = this.talogger.CreateJsonSearcher(request.Index);
                     var logs = searcher.SearchJsonLogs(tagQuery);
                     if (logs.IsNullOrEmpty())
                     {
@@ -142,7 +142,7 @@ namespace V.Talog.Server.Controllers
                 }
                 else
                 {
-                    var searcher = this.taloger.CreateSearcher(request.Index);
+                    var searcher = this.talogger.CreateSearcher(request.Index);
                     var logs = searcher.SearchLogs(tagQuery);
                     return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage);
                 }
@@ -155,7 +155,7 @@ namespace V.Talog.Server.Controllers
         [AdminRole]
         public object GetIndexList()
         {
-            var indexList = this.taloger.GetIndex("stored_index").GetTagValues("name");
+            var indexList = this.talogger.GetIndex("stored_index").GetTagValues("name");
             return new
             {
                 status = 0,
@@ -176,7 +176,7 @@ namespace V.Talog.Server.Controllers
         [AdminRole]
         public Result Remove([FromBody] SearchLogRequest request)
         {
-            var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
+            var storedIndexSearcher = this.talogger.CreateJsonSearcher("stored_index");
             var query = new Query("name", request.Index);
             var json = storedIndexSearcher.SearchJsonLogs(query)
                 ?.Select(x => x.Data)
@@ -185,13 +185,13 @@ namespace V.Talog.Server.Controllers
             {
                 return new Result { Msg = "删除成功" };
             }
-            var tagQuery = this.taloger.CreateQueryByExpression(request.Index, request.TagQuery);
+            var tagQuery = this.talogger.CreateQueryByExpression(request.Index, request.TagQuery);
             if (tagQuery == null)
             {
                 return new Result { Code = -1, Msg = $"{request.TagQuery} 解析失败，请检查表达式" };
             }
 
-            this.taloger.CreateSearcher(request.Index)
+            this.talogger.CreateSearcher(request.Index)
                 .Remove(tagQuery);
             return new Result { Msg = "删除成功" };
         }

@@ -2,16 +2,16 @@
 {
     public class IndexMapping : IIndexMapping
     {
-        private Taloger taloger;
+        private Talogger talogger;
 
-        public IndexMapping(Taloger taloger)
+        public IndexMapping(Talogger talogger)
         {
-            this.taloger = taloger;
+            this.talogger = talogger;
         }
 
         public Type GetFieldType(string index, string field)
         {
-            var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
+            var storedIndexSearcher = this.talogger.CreateJsonSearcher("stored_index");
             var query = new Query("field_mapping", index);
             var json = storedIndexSearcher.SearchJsonLogs(query)
                 ?.Select(x => x.Data)
@@ -26,7 +26,7 @@
 
         public Type GetTagType(string index, string tag)
         {
-            var storedIndexSearcher = this.taloger.CreateJsonSearcher("stored_index");
+            var storedIndexSearcher = this.talogger.CreateJsonSearcher("stored_index");
             var query = new Query("tag_mapping", index);
             var json = storedIndexSearcher.SearchJsonLogs(query)
                 ?.Select(x => x.Data)
