@@ -132,34 +132,8 @@ namespace V.Talog.Server.Controllers
 
                         return filter(l);
                     }).ToList();
-                    
-                    if (!string.IsNullOrWhiteSpace(request.Sort))
-                    {
-                        var orders = request.Sort.Split(" then ");
-                        IOrderedEnumerable<TaggedJsonLog<JObject>> sort;
-                        var strs = orders[0].Trim().Split(' ');
-                        if (strs.Length > 1 && strs[1].ToLower() == "desc")
-                        {
-                            sort = logs.OrderByDescending(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
-                        }
-                        else
-                        {
-                            sort = logs.OrderBy(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
-                        }
-                        for (int i = 1; i < orders.Length; i++)
-                        {
-                            strs = orders[i].Trim().Split(' ');
-                            if (strs.Length > 1 && strs[1].ToLower() == "desc")
-                            {
-                                sort = sort.ThenByDescending(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
-                            }
-                            else
-                            {
-                                sort = sort.ThenBy(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
-                            }
-                        }
-                        logs = sort.ToList();
-                    }
+
+                    logs = logs.Sort(request.Index, request.Sort, (x, key) => this.GetValue(x.Data, key.Split('.'))?.ToString());
 
                     return Result.Success(new
                     {
@@ -253,34 +227,7 @@ namespace V.Talog.Server.Controllers
                 }
 
                 var parsedLogs = logs.SelectParsedLogs(regex, filter);
-
-                if (!string.IsNullOrWhiteSpace(sortExp))
-                {
-                    var orders = sortExp.Split(" then ");
-                    IOrderedEnumerable<ParsedLog> sort;
-                    var strs = orders[0].Trim().Split(' ');
-                    if (strs.Length > 1 && strs[1].ToLower() == "desc")
-                    {
-                        sort = parsedLogs.OrderByDescending(x => x.Groups[strs[0]]);
-                    }
-                    else
-                    {
-                        sort = parsedLogs.OrderBy(x => x.Groups[strs[0]]);
-                    }
-                    for (int i = 1; i < orders.Length; i++)
-                    {
-                        strs = orders[i].Trim().Split(' ');
-                        if (strs.Length > 1 && strs[1].ToLower() == "desc")
-                        {
-                            sort = sort.ThenByDescending(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
-                        }
-                        else
-                        {
-                            sort = sort.ThenBy(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
-                        }
-                    }
-                    parsedLogs = sort.ToList();
-                }
+                parsedLogs = parsedLogs.Sort(index, sortExp, (x, key) => x.Groups[key]);
 
                 return Result.Success(new
                 {

@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using V.Common.Extensions;
 using V.QueryParser;
@@ -208,6 +210,74 @@ namespace V.Talog
             var queryExpression = new QueryExpression(expression);
             var idx = talogger.GetIndex(index);
             return BuildQuery(queryExpression, idx);
+        }
+
+        public static List<T> Sort<T>(this List<T> logs, string index, string sortExp, Func<T, string, object> getValue)
+        {
+            if (string.IsNullOrWhiteSpace(sortExp))
+            {
+                return logs;
+            }
+
+            var orders = sortExp.Split(new string[] { " then " }, StringSplitOptions.RemoveEmptyEntries);
+            IOrderedEnumerable<T> sortResult;
+            var strs = orders[0].Trim().Split(' ');
+            var type = _indexMapping.GetFieldType(index, strs[0]);
+            if (strs.Length > 1 && strs[1].ToLower() == "desc")
+            {
+                sortResult = logs.OrderByDescending(x =>
+                {
+                    var value = getValue(x, strs[0]);
+                    if (value is string str)
+                    {
+                        value = Converter.FromString(str, type);
+                    }
+                    return value;
+                });
+            }
+            else
+            {
+                sortResult = logs.OrderBy(x =>
+                {
+                    var value = getValue(x, strs[0]);
+                    if (value is string str)
+                    {
+                        value = Converter.FromString(str, type);
+                    }
+                    return value;
+                });
+            }
+            for (int i = 1; i < orders.Length; i++)
+            {
+                strs = orders[i].Trim().Split(' ');
+                type = _indexMapping.GetFieldType(index, strs[0]);
+                if (strs.Length > 1 && strs[1].ToLower() == "desc")
+                {
+                    sortResult = sortResult.ThenByDescending(x =>
+                    {
+                        var value = getValue(x, strs[0]);
+                        if (value is string str)
+                        {
+                            value = Converter.FromString(str, type);
+                        }
+                        return value;
+                    });
+                }
+                else
+                {
+                    sortResult = sortResult.ThenBy(x =>
+                    {
+                        var value = getValue(x, strs[0]);
+                        if (value is string str)
+                        {
+                            value = Converter.FromString(str, type);
+                        }
+                        return value;
+                    });
+                }
+            }
+
+            return sortResult.ToList();
         }
 
         private static Query BuildQuery(QueryExpression expression, Index index)
