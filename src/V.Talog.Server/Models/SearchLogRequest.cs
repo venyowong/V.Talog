@@ -21,5 +21,11 @@ namespace V.Talog.Server.Models
         /// <para>若 Regex 为空，则认为数据是 Json 格式</para>
         /// </summary>
         public string FieldQuery { get; set; }
+
+        /// <summary>
+        /// 排序规则
+        /// <para>type asc then date desc then ...</para>
+        /// </summary>
+        public string Sort { get; set; }
     }
 }

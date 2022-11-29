@@ -10,11 +10,12 @@ namespace V.Talog.Server.Models
         [Required]
         public string Index { get; set; }
 
-        [Required]
         public string TagQuery { get; set; } 
 
         public string Regex { get; set; }
 
         public string FieldQuery { get; set; }
+
+        public string Sort { get; set; }
     }
 }

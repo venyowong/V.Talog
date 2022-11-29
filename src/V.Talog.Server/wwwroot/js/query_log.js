@@ -39,6 +39,12 @@ let queryLogBody = {
                     "type": "input-text",
                     "name": "fieldQuery",
                     placeholder: "若日志为 json 格式或使用正则匹配时，可根据字段进行进一步查询"
+                },
+                {
+                    label: "排序规则",
+                    type: "input-text",
+                    name: "sort",
+                    placeholder: "例如：type asc then date desc then ..."
                 }
             ],
             actions: [
@@ -59,7 +65,8 @@ let queryLogBody = {
                                     index: "${index}",
                                     tagQuery: "${tagQuery}",
                                     regex: "${regex}",
-                                    fieldQuery: "${fieldQuery}"
+                                    fieldQuery: "${fieldQuery}",
+                                    sort: "${sort}"
                                 }
                             },
                             body: {
@@ -123,7 +130,7 @@ let queryLogBody = {
                     label: "查询",
                     level: "primary",
                     actionType: "reload",
-                    target: "logs?index=${index}&tagQuery=${tagQuery}&regex=${regex}&fieldQuery=${fieldQuery}"
+                    target: "logs?index=${index}&tagQuery=${tagQuery}&regex=${regex}&fieldQuery=${fieldQuery}&sort=${sort}"
                 }
             ]
         },
@@ -137,7 +144,8 @@ let queryLogBody = {
                     index: "${index}",
                     tagQuery: "${tagQuery}",
                     regex: "${regex}",
-                    fieldQuery: "${fieldQuery}"
+                    fieldQuery: "${fieldQuery}",
+                    sort: "${sort}"
                 }
             },
             mode: "list",

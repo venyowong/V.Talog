@@ -101,7 +101,7 @@ namespace V.Talog.Server.Controllers
             {
                 var searcher = this.talogger.CreateHeaderSearcher(request.Index, json["head"].ToString());
                 var logs = searcher.SearchLogs(tagQuery);
-                return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage);
+                return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage, request.Sort);
             }
             else
             {
@@ -132,6 +132,35 @@ namespace V.Talog.Server.Controllers
 
                         return filter(l);
                     }).ToList();
+                    
+                    if (!string.IsNullOrWhiteSpace(request.Sort))
+                    {
+                        var orders = request.Sort.Split(" then ");
+                        IOrderedEnumerable<TaggedJsonLog<JObject>> sort;
+                        var strs = orders[0].Trim().Split(' ');
+                        if (strs.Length > 1 && strs[1].ToLower() == "desc")
+                        {
+                            sort = logs.OrderByDescending(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
+                        }
+                        else
+                        {
+                            sort = logs.OrderBy(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
+                        }
+                        for (int i = 1; i < orders.Length; i++)
+                        {
+                            strs = orders[i].Trim().Split(' ');
+                            if (strs.Length > 1 && strs[1].ToLower() == "desc")
+                            {
+                                sort = sort.ThenByDescending(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
+                            }
+                            else
+                            {
+                                sort = sort.ThenBy(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
+                            }
+                        }
+                        logs = sort.ToList();
+                    }
+
                     return Result.Success(new
                     {
                         total = logs.Count,
@@ -144,7 +173,7 @@ namespace V.Talog.Server.Controllers
                 {
                     var searcher = this.talogger.CreateSearcher(request.Index);
                     var logs = searcher.SearchLogs(tagQuery);
-                    return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage);
+                    return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage, request.Sort);
                 }
             }
         }
@@ -196,7 +225,7 @@ namespace V.Talog.Server.Controllers
             return new Result { Msg = "删除成功" };
         }
 
-        private Result HandleRegex(List<TaggedLog> logs, string index, string regex, string regexQuery, int page, int perPage)
+        private Result HandleRegex(List<TaggedLog> logs, string index, string regex, string regexQuery, int page, int perPage, string sortExp)
         {
             if (logs.IsNullOrEmpty())
             {
@@ -224,6 +253,35 @@ namespace V.Talog.Server.Controllers
                 }
 
                 var parsedLogs = logs.SelectParsedLogs(regex, filter);
+
+                if (!string.IsNullOrWhiteSpace(sortExp))
+                {
+                    var orders = sortExp.Split(" then ");
+                    IOrderedEnumerable<ParsedLog> sort;
+                    var strs = orders[0].Trim().Split(' ');
+                    if (strs.Length > 1 && strs[1].ToLower() == "desc")
+                    {
+                        sort = parsedLogs.OrderByDescending(x => x.Groups[strs[0]]);
+                    }
+                    else
+                    {
+                        sort = parsedLogs.OrderBy(x => x.Groups[strs[0]]);
+                    }
+                    for (int i = 1; i < orders.Length; i++)
+                    {
+                        strs = orders[i].Trim().Split(' ');
+                        if (strs.Length > 1 && strs[1].ToLower() == "desc")
+                        {
+                            sort = sort.ThenByDescending(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
+                        }
+                        else
+                        {
+                            sort = sort.ThenBy(x => this.GetValue(x.Data, strs[0].Split('.'))?.ToString());
+                        }
+                    }
+                    parsedLogs = sort.ToList();
+                }
+
                 return Result.Success(new
                 {
                     total = parsedLogs.Count,
