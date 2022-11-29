@@ -8,8 +8,6 @@ namespace V.Talog.Server.Models
         [MinLength(1)]
         public string Index { get; set; }
 
-        [Required]
-        [MinLength(1)]
         public string TagQuery { get; set; }
 
         /// <summary>

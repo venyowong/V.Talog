@@ -37,6 +37,10 @@ namespace V.Talog
 
                 return allBuckets.Except(buckets).ToList();
             }
+            if (query.Left == null && query.Right == null)
+            {
+                return this.index.GetBuckets();
+            }
 
             var leftBuckets = this.Search(query.Left);
             var rightBuckets = this.Search(query.Right);

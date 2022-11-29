@@ -234,7 +234,7 @@ namespace V.Talog
                         return null;
                 }
             }
-            else
+            else if (expression.Type == QueryType.Compound)
             {
                 if (expression.Symbols.IsNullOrEmpty())
                 {
@@ -290,6 +290,10 @@ namespace V.Talog
                 }
 
                 return queries[slen];
+            }
+            else
+            {
+                return new Query();
             }
         }
 

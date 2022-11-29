@@ -17,6 +17,8 @@ namespace V.Talog
 
         public Query Right { get; set; }
 
+        public Query() { }
+
         public Query(string label, string value)
         {
             this.Tag = new Tag

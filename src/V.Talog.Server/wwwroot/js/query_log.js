@@ -26,8 +26,7 @@ let queryLogBody = {
                 {
                     label: "标签查询",
                     "type": "input-text",
-                    "name": "tagQuery",
-                    required: true
+                    "name": "tagQuery"
                 },
                 {
                     label: "正则表达式",
