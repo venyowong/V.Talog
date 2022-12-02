@@ -15,6 +15,8 @@ namespace V.Talog
             this.index = index;
         }
 
+        public string GetIndexName() => this.index.Name;
+
         public List<Bucket> Search(Query query)
         {
             if (query == null)

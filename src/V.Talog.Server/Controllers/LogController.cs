@@ -97,57 +97,74 @@ namespace V.Talog.Server.Controllers
                 return new Result { Code = -1, Msg = $"{request.TagQuery} 解析失败，请检查表达式" };
             }
 
-            if (json["type"].ToString() == "1")
+            if ((!string.IsNullOrWhiteSpace(request.FieldQuery) || !string.IsNullOrWhiteSpace(request.Sort)) && string.IsNullOrWhiteSpace(request.Regex))
             {
-                var searcher = this.talogger.CreateHeaderSearcher(request.Index, json["head"].ToString());
-                var logs = searcher.SearchLogs(tagQuery);
-                return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage, request.Sort);
+                var searcher = this.talogger.CreateJsonSearcher(request.Index);
+                var logs = searcher.SearchJsonLogs(tagQuery, request.Sort, request.FieldQuery);
+                if (logs.IsNullOrEmpty())
+                {
+                    return Result.Success(new List<TaggedLog>());
+                }
+
+                return Result.Success(new
+                {
+                    total = logs.Count,
+                    items = logs.Skip((page - 1) * perPage)
+                        .Take(perPage)
+                        .ToList()
+                });
             }
             else
             {
-                if (!string.IsNullOrWhiteSpace(request.FieldQuery) && string.IsNullOrWhiteSpace(request.Regex))
+                Searcher searcher;
+                if (json["type"].ToString() == "1")
                 {
-                    var searcher = this.talogger.CreateJsonSearcher(request.Index);
-                    var logs = searcher.SearchJsonLogs(tagQuery);
-                    if (logs.IsNullOrEmpty())
+                    searcher = this.talogger.CreateHeaderSearcher(request.Index, json["head"].ToString());
+                }
+                else
+                {
+                    searcher = this.talogger.CreateSearcher(request.Index);
+                }
+                if (string.IsNullOrWhiteSpace(request.Regex))
+                {
+                    List<TaggedLog> logs;
+                    if (string.IsNullOrWhiteSpace(request.Sort))
                     {
-                        return Result.Success(logs);
+                        logs = searcher.SearchLogs(tagQuery);
+                    }
+                    else
+                    {
+                        logs = searcher.SearchLogs(tagQuery, request.Sort);
                     }
 
-                    var jsonQuery = new QueryExpression(request.FieldQuery);
-                    Func<TaggedJsonLog<JObject>, bool> filter = log =>
+                    if (logs.IsNullOrEmpty())
                     {
-                        return jsonQuery.Execute(request.Index, name =>
-                        {
-                            return this.GetValue(log.Data, name.Split('.'))?.ToString();
-                        });
-                    };
-
-                    logs = logs.Where(l =>
-                    {
-                        if (filter == null)
-                        {
-                            return true;
-                        }
-
-                        return filter(l);
-                    }).ToList();
-
-                    logs = logs.Sort(request.Index, request.Sort, (x, key) => this.GetValue(x.Data, key.Split('.'))?.ToString());
+                        return Result.Success(new List<TaggedLog>());
+                    }
 
                     return Result.Success(new
                     {
                         total = logs.Count,
                         items = logs.Skip((page - 1) * perPage)
-                        .Take(perPage)
-                        .ToList()
+                            .Take(perPage)
+                            .ToList()
                     });
                 }
                 else
                 {
-                    var searcher = this.talogger.CreateSearcher(request.Index);
-                    var logs = searcher.SearchLogs(tagQuery);
-                    return this.HandleRegex(logs, request.Index, request.Regex, request.FieldQuery, page, perPage, request.Sort);
+                    var logs = searcher.SearchLogs(tagQuery, request.Regex, request.FieldQuery, request.Sort);
+                    if (logs.IsNullOrEmpty())
+                    {
+                        return Result.Success(new List<TaggedLog>());
+                    }
+
+                    return Result.Success(new
+                    {
+                        total = logs.Count,
+                        items = logs.Skip((page - 1) * perPage)
+                            .Take(perPage)
+                            .ToList()
+                    });
                 }
             }
         }
@@ -197,68 +214,6 @@ namespace V.Talog.Server.Controllers
             this.talogger.CreateSearcher(request.Index)
                 .Remove(tagQuery);
             return new Result { Msg = "删除成功" };
-        }
-
-        private Result HandleRegex(List<TaggedLog> logs, string index, string regex, string regexQuery, int page, int perPage, string sortExp)
-        {
-            if (logs.IsNullOrEmpty())
-            {
-                return Result.Success(logs);
-            }
-
-            if (!string.IsNullOrWhiteSpace(regex))
-            {
-                Func<ParsedLog, bool> filter = null;
-                if (!string.IsNullOrWhiteSpace(regexQuery))
-                {
-                    var query = new QueryExpression(regexQuery);
-                    filter = log =>
-                    {
-                        return query.Execute(index, name =>
-                        {
-                            if (!log.Groups.ContainsKey(name))
-                            {
-                                return null;
-                            }
-
-                            return log.Groups[name];
-                        });
-                    };
-                }
-
-                var parsedLogs = logs.SelectParsedLogs(regex, filter);
-                parsedLogs = parsedLogs.Sort(index, sortExp, (x, key) => x.Groups[key]);
-
-                return Result.Success(new
-                {
-                    total = parsedLogs.Count,
-                    items = parsedLogs.Skip((page - 1) * perPage)
-                        .Take(perPage)
-                        .ToList()
-                });
-            }
-
-            return Result.Success(new
-            {
-                total = logs.Count,
-                items = logs.Skip((page - 1) * perPage)
-                        .Take(perPage)
-                        .ToList()
-            });
-        }
-
-        private JToken GetValue(JToken obj, string[] fields, int index = 0)
-        {
-            if (obj == null)
-            {
-                return null;
-            }
-            if (index == fields.Length - 1)
-            {
-                return obj[fields[index]];
-            }
-
-            return this.GetValue(obj[fields[index]], fields, index + 1);
         }
     }
 }

@@ -1,10 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
+using Serilog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using V.Common.Extensions;
 using V.QueryParser;
 
@@ -79,6 +82,122 @@ namespace V.Talog
             return new JsonSearcher(talogger.GetIndex(index));
         }
 
+        /// <summary>
+        /// 查询日志，支持标签排序
+        /// </summary>
+        /// <param name="searcher"></param>
+        /// <param name="query"></param>
+        /// <param name="sort"></param>
+        /// <returns></returns>
+        public static List<TaggedLog> SearchLogs(this Searcher searcher, Query query, string sort)
+        {
+            var logs = searcher.SearchLogs(query);
+            if (logs.IsNullOrEmpty())
+            {
+                return logs;
+            }
+            if (string.IsNullOrWhiteSpace(sort))
+            {
+                throw new ArgumentNullException(nameof(sort));
+            }
+
+            return Sort(logs, searcher.GetIndexName(), sort, (x, name) => x.Tags.FirstOrDefault(t => t.Label == name)?.Value);
+        }
+
+        /// <summary>
+        /// 使用正则表达式匹配日志，并支持基于匹配结果做进一步字段筛选
+        /// <para>支持基于标签、正则字段进行排序</para>
+        /// </summary>
+        /// <param name="searcher"></param>
+        /// <param name="query">标签查询</param>
+        /// <param name="regex">用于匹配日志的正则表达式</param>
+        /// <param name="regexQuery">基于正则匹配结果的字段查询</param>
+        /// <param name="sort">排序表达式</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static List<ParsedLog> SearchLogs(this Searcher searcher, Query query, string regex, string regexQuery = null, string sort = null)
+        {
+            var logs = searcher.SearchLogs(query);
+            if (logs.IsNullOrEmpty())
+            {
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(regex))
+            {
+                throw new ArgumentNullException(nameof(regex));
+            }
+
+            Func<ParsedLog, string, bool, object> getValue = (x, name, fromTag) =>
+            {
+                if (fromTag)
+                {
+                    var tag = x.Tags.FirstOrDefault(t => t.Label == name);
+                    if (tag != null)
+                    {
+                        return tag.Value;
+                    }
+                }
+                if (!x.Groups.ContainsKey(name))
+                {
+                    return null;
+                }
+
+                return x.Groups[name];
+            };
+            var index = searcher.GetIndexName();
+            var parsedLogs = logs.SelectParsedLogs(regex);
+            if (!string.IsNullOrWhiteSpace(regexQuery))
+            {
+                var fieldQuery = new QueryExpression(regexQuery);
+                parsedLogs = parsedLogs.FindAll(x => fieldQuery.Execute(index, name => getValue(x, name, false)));
+            }
+            if (!string.IsNullOrWhiteSpace(sort))
+            {
+                parsedLogs = Sort(parsedLogs, index, sort, (x, name) => getValue(x, name, true));
+            }
+            return parsedLogs;
+        }
+
+        /// <summary>
+        /// 搜索 json 日志，并支持基于 json 字段做进一步筛选
+        /// <para>支持基于标签、json 字段进行排序</para>
+        /// </summary>
+        /// <param name="searcher"></param>
+        /// <param name="query"></param>
+        /// <param name="fieldQuery"></param>
+        /// <param name="sort"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static List<TaggedJsonLog<JObject>> SearchJsonLogs(this JsonSearcher searcher, Query query, string sort = null, string fieldQuery = null)
+        {
+            var logs = searcher.SearchJsonLogs(query);
+            if (logs.IsNullOrEmpty())
+            {
+                return logs;
+            }
+
+            var index = searcher.GetIndexName();
+            if (!string.IsNullOrWhiteSpace(fieldQuery))
+            {
+                var fieldQueryExp = new QueryExpression(fieldQuery);
+                logs = logs.FindAll(x => fieldQueryExp.Execute(index, name => GetValue(x.Data, name.Split('.'))?.ToString()));
+            }
+            if (!string.IsNullOrWhiteSpace(sort))
+            {
+                logs = Sort(logs, index, sort, (x, name) =>
+                {
+                    var tag = x.Tags.FirstOrDefault(t => t.Label == name);
+                    if (tag != null)
+                    {
+                        return tag.Value;
+                    }
+
+                    return GetValue(x.Data, name.Split('.'))?.ToString();
+                });
+            }
+            return logs;
+        }
+
         public static IServiceCollection AddTalogger(this IServiceCollection services, Action<Config> config = null, Func<Talogger, IIndexMapping> getMapping = null)
         {
             var talogger = new Talogger();
@@ -89,113 +208,6 @@ namespace V.Talog
             }
             services.AddSingleton(talogger);
             return services;
-        }
-
-        public static bool Execute(this QueryExpression query, string index, Func<string, object> getValue)
-        {
-            if (_indexMapping == null)
-            {
-                throw new ArgumentNullException("IIndexMapping", "Talogger 未配置 IIndexMapping，无法使用 RegexQuery、JsonQuery");
-            }
-
-            if (query.Type == QueryType.Base)
-            {
-                var type = _indexMapping.GetFieldType(index, query.Key);
-                var value = getValue(query.Key);
-                if (value is string str)
-                {
-                    value = Converter.FromString(str, type);
-                }
-                var value2 = Converter.FromString(query.Value, type);
-
-                switch (query.Ope)
-                {
-                    case Symbol.Eq:
-                        return value.Equals(value2);
-                    case Symbol.Neq:
-                        return !value.Equals(value2);
-                    case Symbol.Gt:
-                        return ((dynamic)value).CompareTo((dynamic)value2) > 0;
-                    case Symbol.Gte:
-                        return ((dynamic)value).CompareTo((dynamic)value2) >= 0;
-                    case Symbol.Lt:
-                        return ((dynamic)value).CompareTo((dynamic)value2) < 0;
-                    case Symbol.Lte:
-                        return ((dynamic)value).CompareTo((dynamic)value2) <= 0;
-                    case Symbol.Like:
-                        return value.ToString().Contains(value2.ToString());
-                    default:
-                        return false;
-                }
-            }
-            else
-            {
-                if (query.Symbols.IsNullOrEmpty())
-                {
-                    return false;
-                }
-
-                var slen = query.Symbols.Count;
-                var results = query.Queries.Select(q => q.Execute(index, getValue)).ToList();
-                var rlen = results.Count;
-
-                // 先处理 and 运算
-                for (int i = 0; i < slen; i++)
-                {
-                    if (query.Symbols[i] != Symbol.And)
-                    {
-                        continue;
-                    }
-
-                    if (i + 1 < rlen)
-                    {
-                        if (results[i] && results[i + 1])
-                        {
-                            results[i] = true;
-                        }
-                        else
-                        {
-                            results[i] = false;
-                        }
-
-                        for (int j = i + 1; j < rlen - 1; j++)
-                        {
-                            results[j] = results[j + 1];
-                        }
-                        rlen--;
-                        for (int j = i + 1; j < slen - 1; j++)
-                        {
-                            query.Symbols[j] = query.Symbols[j + 1];
-                        }
-                        slen--;
-                        i--;
-                    }
-                    else
-                    {
-                        slen = i;
-                    }
-                }
-                if (slen <= 0)
-                {
-                    return results[0];
-                }
-
-                // 再处理 or 运算
-                for (int i = 0; i < slen - 1; i++)
-                {
-                    if (query.Symbols[i] != Symbol.Or)
-                    {
-                        throw new Exception("unexcepted symbol when building, {&&, ||} is valid");
-                    }
-
-                    if (results[i])
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
         }
 
         /// <summary>
@@ -212,13 +224,8 @@ namespace V.Talog
             return BuildQuery(queryExpression, idx);
         }
 
-        public static List<T> Sort<T>(this List<T> logs, string index, string sortExp, Func<T, string, object> getValue)
+        private static List<T> Sort<T>(List<T> logs, string index, string sortExp, Func<T, string, object> getValue)
         {
-            if (string.IsNullOrWhiteSpace(sortExp))
-            {
-                return logs;
-            }
-
             var orders = sortExp.Split(new string[] { " then " }, StringSplitOptions.RemoveEmptyEntries);
             IOrderedEnumerable<T> sortResult;
             var strs = orders[0].Trim().Split(' ');
@@ -401,6 +408,127 @@ namespace V.Talog
                 }
             }
             return query;
+        }
+
+        private static JToken GetValue(JToken obj, string[] fields, int index = 0)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+            if (index == fields.Length - 1)
+            {
+                return obj[fields[index]];
+            }
+
+            return GetValue(obj[fields[index]], fields, index + 1);
+        }
+
+        private static bool Execute(this QueryExpression query, string index, Func<string, object> getValue)
+        {
+            if (_indexMapping == null)
+            {
+                throw new ArgumentNullException("IIndexMapping", "Talogger 未配置 IIndexMapping，无法使用 RegexQuery、JsonQuery");
+            }
+
+            if (query.Type == QueryType.Base)
+            {
+                var type = _indexMapping.GetFieldType(index, query.Key);
+                var value = getValue(query.Key);
+                if (value is string str)
+                {
+                    value = Converter.FromString(str, type);
+                }
+                var value2 = Converter.FromString(query.Value, type);
+
+                switch (query.Ope)
+                {
+                    case Symbol.Eq:
+                        return value.Equals(value2);
+                    case Symbol.Neq:
+                        return !value.Equals(value2);
+                    case Symbol.Gt:
+                        return ((dynamic)value).CompareTo((dynamic)value2) > 0;
+                    case Symbol.Gte:
+                        return ((dynamic)value).CompareTo((dynamic)value2) >= 0;
+                    case Symbol.Lt:
+                        return ((dynamic)value).CompareTo((dynamic)value2) < 0;
+                    case Symbol.Lte:
+                        return ((dynamic)value).CompareTo((dynamic)value2) <= 0;
+                    case Symbol.Like:
+                        return value.ToString().Contains(value2.ToString());
+                    default:
+                        return false;
+                }
+            }
+            else
+            {
+                if (query.Symbols.IsNullOrEmpty())
+                {
+                    return false;
+                }
+
+                var slen = query.Symbols.Count;
+                var results = query.Queries.Select(q => q.Execute(index, getValue)).ToList();
+                var rlen = results.Count;
+
+                // 先处理 and 运算
+                for (int i = 0; i < slen; i++)
+                {
+                    if (query.Symbols[i] != Symbol.And)
+                    {
+                        continue;
+                    }
+
+                    if (i + 1 < rlen)
+                    {
+                        if (results[i] && results[i + 1])
+                        {
+                            results[i] = true;
+                        }
+                        else
+                        {
+                            results[i] = false;
+                        }
+
+                        for (int j = i + 1; j < rlen - 1; j++)
+                        {
+                            results[j] = results[j + 1];
+                        }
+                        rlen--;
+                        for (int j = i + 1; j < slen - 1; j++)
+                        {
+                            query.Symbols[j] = query.Symbols[j + 1];
+                        }
+                        slen--;
+                        i--;
+                    }
+                    else
+                    {
+                        slen = i;
+                    }
+                }
+                if (slen <= 0)
+                {
+                    return results[0];
+                }
+
+                // 再处理 or 运算
+                for (int i = 0; i < slen - 1; i++)
+                {
+                    if (query.Symbols[i] != Symbol.Or)
+                    {
+                        throw new Exception("unexcepted symbol when building, {&&, ||} is valid");
+                    }
+
+                    if (results[i])
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
     }
 }
