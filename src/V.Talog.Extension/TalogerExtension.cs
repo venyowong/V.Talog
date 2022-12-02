@@ -17,6 +17,11 @@ namespace V.Talog
     {
         private static IIndexMapping _indexMapping = null;
 
+        public static void SetIndexMapping(IIndexMapping indexMapping)
+        {
+            _indexMapping = indexMapping;
+        }
+
         /// <summary>
         /// 创建 HeaderIndexer
         /// </summary>
