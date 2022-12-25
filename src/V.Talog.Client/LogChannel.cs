@@ -52,7 +52,8 @@ namespace V.Talog.Client
                 tags.Add(tag.Key, tag.Value);
             }
             return new TaggedLog(this.index, tags, this.type, this.head)
-                .Tag("level", "info");
+                .Tag("level", "info")
+                .Tag("date", DateTime.Now.ToString("yyyyMMdd"));
         }
 
         public TaggedLog Debug()
@@ -63,7 +64,8 @@ namespace V.Talog.Client
                 tags.Add(tag.Key, tag.Value);
             }
             return new TaggedLog(this.index, tags, this.type, this.head)
-                .Tag("level", "debug");
+                .Tag("level", "debug")
+                .Tag("date", DateTime.Now.ToString("yyyyMMdd"));
         }
 
         public TaggedLog Trace()
@@ -74,7 +76,8 @@ namespace V.Talog.Client
                 tags.Add(tag.Key, tag.Value);
             }
             return new TaggedLog(this.index, tags, this.type, this.head)
-                .Tag("level", "trace");
+                .Tag("level", "trace")
+                .Tag("date", DateTime.Now.ToString("yyyyMMdd"));
         }
 
         public TaggedLog Warn()
@@ -85,7 +88,8 @@ namespace V.Talog.Client
                 tags.Add(tag.Key, tag.Value);
             }
             return new TaggedLog(this.index, tags, this.type, this.head)
-                .Tag("level", "warn");
+                .Tag("level", "warn")
+                .Tag("date", DateTime.Now.ToString("yyyyMMdd"));
         }
 
         public TaggedLog Error()
@@ -96,7 +100,8 @@ namespace V.Talog.Client
                 tags.Add(tag.Key, tag.Value);
             }
             return new TaggedLog(this.index, tags, this.type, this.head)
-                .Tag("level", "error");
+                .Tag("level", "error")
+                .Tag("date", DateTime.Now.ToString("yyyyMMdd"));
         }
 
         public TaggedLog Fatal()
@@ -107,7 +112,8 @@ namespace V.Talog.Client
                 tags.Add(tag.Key, tag.Value);
             }
             return new TaggedLog(this.index, tags, this.type, this.head)
-                .Tag("level", "fatal");
+                .Tag("level", "fatal")
+                .Tag("date", DateTime.Now.ToString("yyyyMMdd"));
         }
 
         public TaggedLog Create()
