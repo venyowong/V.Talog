@@ -51,9 +51,17 @@ namespace V.Talog
                 return result;
             }
 
-            result = new Index(index, this.Config);
-            this.indexes.TryAdd(index, result);
-            return result;
+            lock (this)
+            {
+                if (this.indexes.TryGetValue(index, out result))
+                {
+                    return result;
+                }
+
+                result = new Index(index, this.Config);
+                this.indexes.TryAdd(index, result);
+                return result;
+            }
         }
 
         public void RemoveIndex(string index)
