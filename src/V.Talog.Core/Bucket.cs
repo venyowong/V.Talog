@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
+using V.Talog.Core;
 
 namespace V.Talog
 {
@@ -14,8 +15,6 @@ namespace V.Talog
         public List<Tag> Tags { get; set; }
 
         public string File { get; set; }
-
-        private Mutex mutex;
 
         public Bucket() { }
 
@@ -30,14 +29,7 @@ namespace V.Talog
 
         public void Append(params string[] data)
         {
-            if (this.mutex == null)
-            {
-                this.mutex = new Mutex(false, $"Bucket_{this.Index}_{this.Key}");
-            }
-
-            this.mutex.WaitOne();
-            System.IO.File.AppendAllLines(this.File, data);
-            this.mutex.ReleaseMutex();
+            FileManager.AppendText(this.File, data);
         }
 
         public override bool Equals(object obj)

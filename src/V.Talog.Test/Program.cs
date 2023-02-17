@@ -8,7 +8,7 @@ using V.Talog.Extension.Serilog;
 //V.Talog.Client.Config.TalogServer = "https://vbranch.cn/talog";
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithThreadId()
-    .MinimumLevel.Information()
+    .MinimumLevel.Debug()
     .WriteTo.Console()
     .WriteTo.Talog(new LogChannel("test2"))
     .CreateLogger();
@@ -29,36 +29,36 @@ var logs = new Faker<V.Talog.Test.Log>()
 //}
 
 var stopwatch = new Stopwatch();
-var times = 200000;
-//var logList = Enumerable.Range(0, times)
-//    .AsParallel()
-//    .Select(x => logs.Generate())
-//    .ToList();
+var times = 10000;
+var logList = Enumerable.Range(0, times)
+    .AsParallel()
+    .Select(x => logs.Generate())
+    .ToList();
 
-//stopwatch.Start();
-//logList.AsParallel()
-//    .ForAll(log =>
-//    {
-//        talogger.CreateHeaderIndexer("log3")
-//            .Tag("date", log.Time.Date.ToString())
-//            .Tag("level", log.Level.ToString())
-//            .Data($@"{log.Time} [{log.Level}] {log.IP} 
-//                    {log.Message}")
-//            .Save();
-//    });
-//stopwatch.Stop();
-foreach (var i in Enumerable.Range(0, times))
-{
-    var log = logs.Generate();
-    stopwatch.Start();
-    talogger.CreateHeaderIndexer("log3")
-        .Tag("date", log.Time.Date.ToString())
-        .Tag("level", log.Level.ToString())
-        .Data($@"{log.Time} [{log.Level}] {log.IP} 
-            {log.Message}")
-        .Save();
-    stopwatch.Stop();
-}
+stopwatch.Start();
+logList.AsParallel()
+    .ForAll(log =>
+    {
+        talogger.CreateHeaderIndexer("log3")
+            .Tag("date", log.Time.Date.ToString())
+            .Tag("level", log.Level.ToString())
+            .Data($@"{log.Time} [{log.Level}] {log.IP} 
+                    {log.Message}")
+            .Save();
+    });
+stopwatch.Stop();
+//foreach (var i in Enumerable.Range(0, times))
+//{
+//    var log = logs.Generate();
+//    stopwatch.Start();
+//    talogger.CreateHeaderIndexer("log3")
+//        .Tag("date", log.Time.Date.ToString())
+//        .Tag("level", log.Level.ToString())
+//        .Data($@"{log.Time} [{log.Level}] {log.IP} 
+//            {log.Message}")
+//        .Save();
+//    stopwatch.Stop();
+//}
 Console.WriteLine($"索引 {times} 条日志，总耗时：{stopwatch.Elapsed}");
 
 //foreach (var i in Enumerable.Range(0, 20))

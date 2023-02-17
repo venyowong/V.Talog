@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using V.Talog.Core;
 
 namespace V.Talog
 {
@@ -152,6 +153,8 @@ namespace V.Talog
                         index.Save();
                     }
                 }
+
+                FileManager.Flush();
 
                 Thread.Sleep(this.Config.TaloggerAutoSaveInterval);
             }

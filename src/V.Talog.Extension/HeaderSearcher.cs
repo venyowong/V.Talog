@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using V.Talog.Core;
 
 namespace V.Talog
 {
@@ -32,7 +33,7 @@ namespace V.Talog
             var result = new List<TaggedLog>();
             foreach (var b in buckets)
             {
-                var lines = File.ReadAllLines(b.File);
+                var lines = FileManager.ReadAllLines(b.File);
                 if (!lines.Any())
                 {
                     continue;

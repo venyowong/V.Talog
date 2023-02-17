@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using V.Talog.Core;
 
 namespace V.Talog
 {
@@ -98,10 +99,7 @@ namespace V.Talog
                     Tags = tags
                 });
             }
-            lock (this)
-            {
-                File.WriteAllText(this.unsavedLogsPath, JsonConvert.SerializeObject(this.unsavedLogs));
-            }
+            FileManager.WriteAllText(this.unsavedLogsPath, JsonConvert.SerializeObject(this.unsavedLogs));
 
             this.PushWithNoGuarantee(tags, data);
         }
@@ -185,9 +183,12 @@ namespace V.Talog
 
             try
             {
-                File.Delete(bucket.File);
+                FileManager.Delete(bucket.File);
             }
-            catch { }
+            catch (Exception e)
+            {
+                Log.Warning(e, $"删除 {bucket.File} 失败");
+            }
 
             return true;
         }
@@ -199,24 +200,18 @@ namespace V.Talog
                 return;
             }
 
-            lock (this)
-            {
-                File.WriteAllText(this.indexPath, JsonConvert.SerializeObject(this));
-
-                this.unsavedLogs = new ConcurrentBag<TaggedLog>();
-
-                if (File.Exists(this.unsavedLogsPath))
-                {
-                    File.Delete(this.unsavedLogsPath);
-                }
-
-                this.needSave = false;
-            }
+            FileManager.WriteAllText(this.indexPath, JsonConvert.SerializeObject(this));
+            this.unsavedLogs = new ConcurrentBag<TaggedLog>();
+            FileManager.Delete(this.unsavedLogsPath);
+            this.needSave = false;
         }
 
         public void Dispose()
         {
             this.Save();
+
+            FileManager.TryRelease(this.Buckets.Values.Select(x => x.File).ToArray());
+            FileManager.TryRelease(this.unsavedLogsPath, this.indexPath);
         }
     }
 }
