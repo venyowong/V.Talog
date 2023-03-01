@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="data\**" />
+    <Compile Remove="log\**" />
+    <Content Remove="data\**" />
+    <Content Remove="log\**" />
+    <EmbeddedResource Remove="data\**" />
+    <EmbeddedResource Remove="log\**" />
+    <None Remove="data\**" />
+    <None Remove="log\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.11" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="5.0.1" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />

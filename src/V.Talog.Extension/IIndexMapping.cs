@@ -10,7 +10,6 @@ namespace V.Talog
 
         /// <summary>
         /// 获取字段类型
-        /// <para>只针对 RegexSearcher、JsonSearcher 使用</para>
         /// </summary>
         /// <param name="index"></param>
         /// <param name="field">正则参数或 json 参数</param>

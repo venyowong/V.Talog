@@ -29,24 +29,24 @@ var logs = new Faker<V.Talog.Test.Log>()
 //}
 
 var stopwatch = new Stopwatch();
-var times = 10000;
-var logList = Enumerable.Range(0, times)
-    .AsParallel()
-    .Select(x => logs.Generate())
-    .ToList();
+//var times = 200000;
+//var logList = Enumerable.Range(0, times)
+//    .AsParallel()
+//    .Select(x => logs.Generate())
+//    .ToList();
 
-stopwatch.Start();
-logList.AsParallel()
-    .ForAll(log =>
-    {
-        talogger.CreateHeaderIndexer("log3")
-            .Tag("date", log.Time.Date.ToString())
-            .Tag("level", log.Level.ToString())
-            .Data($@"{log.Time} [{log.Level}] {log.IP} 
-                    {log.Message}")
-            .Save();
-    });
-stopwatch.Stop();
+//stopwatch.Start();
+//logList.AsParallel()
+//    .ForAll(log =>
+//    {
+//        talogger.CreateHeaderIndexer("log3")
+//            .Tag("date", log.Time.Date.ToString())
+//            .Tag("level", log.Level.ToString())
+//            .Data($@"{log.Time} [{log.Level}] {log.IP} 
+//                    {log.Message}")
+//            .Save();
+//    });
+//stopwatch.Stop();
 //foreach (var i in Enumerable.Range(0, times))
 //{
 //    var log = logs.Generate();
@@ -59,7 +59,7 @@ stopwatch.Stop();
 //        .Save();
 //    stopwatch.Stop();
 //}
-Console.WriteLine($"索引 {times} 条日志，总耗时：{stopwatch.Elapsed}");
+//Console.WriteLine($"索引 {times} 条日志，总耗时：{stopwatch.Elapsed}");
 
 //foreach (var i in Enumerable.Range(0, 20))
 //{
@@ -73,9 +73,15 @@ Console.WriteLine($"索引 {times} 条日志，总耗时：{stopwatch.Elapsed}")
 //        .Save();
 //}
 
-//var query = new Query("level", "0");
-//var logList = talogger.CreateHeaderSearcher("log3")
-//    .SearchLogs(query);
+var query = new Query("level", "0");
+stopwatch.Start();
+var searcher = talogger.CreateHeaderSearcher("log3");
+stopwatch.Stop();
+Console.WriteLine($"初始化 searcher，总耗时：{stopwatch.Elapsed}");
+stopwatch.Restart();
+var logList = searcher.SearchLogs(query);
+stopwatch.Stop();
+Console.WriteLine($"查询日志，总耗时：{stopwatch.Elapsed}");
 //Console.WriteLine(logList.Count);
 //query = new Query("level", "0").Not();
 //logList = talogger.CreateHeaderSearcher("log3")
