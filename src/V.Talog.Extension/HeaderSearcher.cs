@@ -17,6 +17,8 @@ namespace V.Talog
     {
         private string head;
 
+        public string Head { get => this.head; }
+
         public HeaderSearcher(string head, Index index) : base(index)
         {
             this.head = $"[{head}]";

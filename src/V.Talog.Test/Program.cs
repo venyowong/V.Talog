@@ -4,22 +4,30 @@ using System.Diagnostics;
 using V.Talog;
 using V.Talog.Client;
 using V.Talog.Extension.Serilog;
+using V.Talog.Test;
 
 //V.Talog.Client.Config.TalogServer = "https://vbranch.cn/talog";
-Log.Logger = new LoggerConfiguration()
+Serilog.Log.Logger = new LoggerConfiguration()
     .Enrich.WithThreadId()
-    .MinimumLevel.Debug()
+    .MinimumLevel.Information()
     .WriteTo.Console()
     .WriteTo.Talog(new LogChannel("test2"))
     .CreateLogger();
 
 using var talogger = new Talogger();
+TaloggerExtension.SetIndexMapping(new IndexMapping());
 var logs = new Faker<V.Talog.Test.Log>()
     .RuleFor(l => l.Time, f => f.Date.Between(DateTime.Now.AddDays(-5), DateTime.Now))
     .RuleFor(l => l.Level, f => f.Random.Int(0, 2))
     .RuleFor(l => l.IP, f => f.Internet.Ip())
     .RuleFor(l => l.UserId, f => f.Random.Guid().ToString())
     .RuleFor(l => l.Message, f => f.Random.Words());
+
+//talogger.CreateJsonSearcher("1")
+//    .RemoveJsonLogs(talogger.CreateQueryByExpression("1", "platform == WinUI && deviceName == COLORFUL"), "path == 'C:\\Users\\Venyo Wong\\Pictures\\amazarashi_百年以后专辑封面.jpg'");
+
+var jsonLogs = talogger.CreateJsonSearcher("1")
+    .SearchJsonLogs(talogger.CreateQueryByExpression("1", "platform == WinUI && deviceName == COLORFUL"));
 
 //foreach (var i in Enumerable.Range(0, 20))
 //{
@@ -29,7 +37,7 @@ var logs = new Faker<V.Talog.Test.Log>()
 //}
 
 var stopwatch = new Stopwatch();
-var times = 10000;
+var times = 300000;
 var logList = Enumerable.Range(0, times)
     .AsParallel()
     .Select(x => logs.Generate())

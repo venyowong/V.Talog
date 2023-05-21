@@ -47,7 +47,7 @@ namespace V.Talog
         }
 
         private static ConcurrentDictionary<string, Regex> _regexCache = new ConcurrentDictionary<string, Regex>();
-        private static Regex GetRegex(string regex)
+        public static Regex GetRegex(string regex)
         {
             if (_regexCache.TryGetValue(regex, out var reg))
             {
@@ -60,7 +60,7 @@ namespace V.Talog
         }
 
         private static ConcurrentDictionary<Regex, List<string>> _groupNames = new ConcurrentDictionary<Regex, List<string>>();
-        private static List<string> GetGroupNames(Regex regex)
+        public static List<string> GetGroupNames(Regex regex)
         {
             if (_groupNames.TryGetValue(regex, out var groupNames))
             {

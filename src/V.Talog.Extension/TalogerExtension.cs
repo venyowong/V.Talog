@@ -6,10 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using V.Common.Extensions;
 using V.QueryParser;
+using V.Talog.Core;
 
 namespace V.Talog
 {
@@ -201,6 +203,154 @@ namespace V.Talog
                 });
             }
             return logs;
+        }
+
+        public static void RemoveJsonLogs(this JsonSearcher searcher, Query query, string fieldQuery)
+        {
+            var buckets = searcher.Search(query);
+            if (buckets.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            var index = searcher.GetIndexName();
+            var fieldQueryExp = new QueryExpression(fieldQuery);
+            foreach (var b in buckets)
+            {
+                var lines = FileManager.ReadAllLines(b.File);
+                int length = lines.Length;
+                var lineList = lines.ToList();
+                for (int i = 0; i < length;)
+                {
+                    var json = lineList[i].ToObj<JObject>();
+                    if (json == null)
+                    {
+                        continue;
+                    }
+
+                    if (!fieldQueryExp.Execute(index, name => GetValue(json, name.Split('.'))?.ToString()))
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    lineList.RemoveAt(i);
+                    length--;
+                }
+
+                FileManager.WriteAllText(b.File, string.Join(Environment.NewLine, lineList));
+            }
+        }
+
+        public static void RemoveLogs(this Searcher searcher, Query query, string regex, string regexQuery)
+        {
+            var buckets = searcher.Search(query);
+            if (buckets.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            var index = searcher.GetIndexName();
+            var fieldQueryExp = new QueryExpression(regexQuery);
+            var reg = LogExtension.GetRegex(regex);
+            var names = LogExtension.GetGroupNames(reg);
+            foreach (var b in buckets)
+            {
+                var lines = FileManager.ReadAllLines(b.File);
+                int length = lines.Length;
+                var lineList = lines.ToList();
+                for (int i = 0; i < length;)
+                {
+                    var match = reg.Match(lineList[i]);
+                    if (!match.Success)
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    var groups = new Dictionary<string, string>();
+                    foreach (var name in names)
+                    {
+                        groups[name] = match.Groups[name].Value;
+                    }
+
+                    if (!fieldQueryExp.Execute(index, name =>
+                    {
+                        if (!groups.ContainsKey(name))
+                        {
+                            return null;
+                        }
+
+                        return groups[name];
+                    }))
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    lineList.RemoveAt(i);
+                    length--;
+                }
+
+                FileManager.WriteAllText(b.File, string.Join(Environment.NewLine, lineList));
+            }
+        }
+
+        public static void RemoveLogs(this HeaderSearcher searcher, Query query, string regex, string regexQuery)
+        {
+            var buckets = searcher.Search(query);
+            if (buckets.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            var index = searcher.GetIndexName();
+            var fieldQueryExp = new QueryExpression(regexQuery);
+            var reg = LogExtension.GetRegex(regex);
+            var names = LogExtension.GetGroupNames(reg);
+            foreach (var b in buckets)
+            {
+                var lines = FileManager.ReadAllLines(b.File);
+                var text = string.Join(Environment.NewLine, lines);
+                int length = lines.Length;
+                var log = lines[0];
+                for (int i = 1; i < length; i++)
+                {
+                    var line = lines[i];
+                    if (!line.StartsWith(searcher.Head))
+                    {
+                        log += $"{Environment.NewLine}{line}";
+                        continue;
+                    }
+
+                    var match = reg.Match(log);
+                    if (match.Success)
+                    {
+                        var groups = new Dictionary<string, string>();
+                        foreach (var name in names)
+                        {
+                            groups[name] = match.Groups[name].Value;
+                        }
+
+                        if (fieldQueryExp.Execute(index, name =>
+                        {
+                            if (!groups.ContainsKey(name))
+                            {
+                                return null;
+                            }
+
+                            return groups[name];
+                        }))
+                        {
+                            text = text.Replace($"{log}{Environment.NewLine}", "");
+                        }
+                    }
+
+                    log = line.Substring(searcher.Head.Length + 3);
+                }
+
+                FileManager.WriteAllText(b.File, text);
+            }
         }
 
         public static IServiceCollection AddTalogger(this IServiceCollection services, Action<Config> config = null, Func<Talogger, IIndexMapping> getMapping = null)
