@@ -25,7 +25,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="V.Quartz" Version="1.0.0" />
-    <PackageReference Include="V.User" Version="1.0.1" />
+    <PackageReference Include="V.User" Version="1.0.4" />
   </ItemGroup>
 
   <ItemGroup>
