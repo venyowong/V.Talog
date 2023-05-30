@@ -16,6 +16,10 @@ Serilog.Log.Logger = new LoggerConfiguration()
 
 using var talogger = new Talogger();
 TaloggerExtension.SetIndexMapping(new IndexMapping());
+talogger.CreateJsonSearcher("1")
+    .RemoveJsonLogs(talogger.CreateQueryByExpression(
+                        "1", $"platform == WinUI && deviceName == COLORFUL"), $"path == 'D:\\素材\\2023\\03\\25\\202303260027.mp4'");
+
 var logs = new Faker<V.Talog.Test.Log>()
     .RuleFor(l => l.Time, f => f.Date.Between(DateTime.Now.AddDays(-5), DateTime.Now))
     .RuleFor(l => l.Level, f => f.Random.Int(0, 2))

@@ -238,7 +238,7 @@ namespace V.Talog
                     length--;
                 }
 
-                FileManager.WriteAllText(b.File, string.Join(Environment.NewLine, lineList));
+                FileManager.WriteAllText(b.File, string.Join(Environment.NewLine, lineList) + Environment.NewLine);
             }
         }
 
@@ -292,7 +292,7 @@ namespace V.Talog
                     length--;
                 }
 
-                FileManager.WriteAllText(b.File, string.Join(Environment.NewLine, lineList));
+                FileManager.WriteAllText(b.File, string.Join(Environment.NewLine, lineList) + Environment.NewLine);
             }
         }
 
@@ -487,7 +487,17 @@ namespace V.Talog
 
                     if (i + 1 < qlen)
                     {
-                        queries[i] = queries[i].And(queries[i + 1]);
+                        if (queries[i] != null)
+                        {
+                            if (queries[i + 1] != null)
+                            {
+                                queries[i] = queries[i].And(queries[i + 1]);
+                            }
+                            else
+                            {
+                                queries[i] = null;
+                            }
+                        }
                         for (int j = i + 1; j < qlen - 1; j++)
                         {
                             queries[j] = queries[j + 1];
@@ -518,7 +528,17 @@ namespace V.Talog
                         throw new Exception("unexcepted symbol when building, {&&, ||} is valid");
                     }
 
-                    queries[i + 1] = queries[i].Or(queries[i + 1]);
+                    if (queries[i] != null)
+                    {
+                        if (queries[i + 1] != null)
+                        {
+                            queries[i + 1] = queries[i].Or(queries[i + 1]);
+                        }
+                        else
+                        {
+                            queries[i + 1] = queries[i];
+                        }
+                    }
                 }
 
                 return queries[slen];
