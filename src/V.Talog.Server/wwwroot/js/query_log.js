@@ -99,7 +99,7 @@ let queryLogBody = {
                     actionType: "dialog",
                     dialog: {
                       title: "确认",
-                      body: "只有标签查询生效，是否确认删除日志？",
+                      body: "是否确认删除日志？",
                       actions: [
                         {
                           type: "button",
@@ -118,6 +118,8 @@ let queryLogBody = {
                             data: {
                               index: "${index}",
                               tagQuery: "${tagQuery}",
+                              regex: "${regex}",
+                              fieldQuery: "${fieldQuery}",
                               token: token
                             }
                           }

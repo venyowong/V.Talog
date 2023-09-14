@@ -601,6 +601,10 @@ namespace V.Talog
 
         private static bool Execute(this QueryExpression query, string index, Func<string, object> getValue)
         {
+            if (query.Type == QueryType.All)
+            {
+                return true;
+            }
             if (_indexMapping == null)
             {
                 throw new ArgumentNullException("IIndexMapping", "Talogger 未配置 IIndexMapping，无法使用 RegexQuery、JsonQuery");

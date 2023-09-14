@@ -211,8 +211,46 @@ namespace V.Talog.Server.Controllers
                 return new Result { Code = -1, Msg = $"{request.TagQuery} 解析失败，请检查表达式" };
             }
 
-            this.talogger.CreateSearcher(request.Index)
-                .Remove(tagQuery);
+            int.TryParse(json["type"].ToString(), out var type);
+            if (type == 1)
+            {
+                var searcher = this.talogger.CreateHeaderSearcher(request.Index);
+                if (!string.IsNullOrEmpty(request.Regex) && !string.IsNullOrEmpty(request.FieldQuery))
+                {
+                    searcher.RemoveLogs(tagQuery, request.Regex, request.FieldQuery);
+                }
+                else
+                {
+                    searcher.Remove(tagQuery);
+                }
+            }
+            else 
+            {
+                if (!string.IsNullOrEmpty(request.Regex))
+                {
+                    var searcher = this.talogger.CreateSearcher(request.Index);
+                    if (!string.IsNullOrEmpty(request.FieldQuery))
+                    {
+                        searcher.RemoveLogs(tagQuery, request.Regex, request.FieldQuery);
+                    }
+                    else
+                    {
+                        searcher.Remove(tagQuery);
+                    }
+                }
+                else
+                {
+                    var searcher = this.talogger.CreateJsonSearcher(request.Index);
+                    if (!string.IsNullOrEmpty(request.FieldQuery))
+                    {
+                        searcher.RemoveJsonLogs(tagQuery, request.FieldQuery);
+                    }
+                    else
+                    {
+                        searcher.Remove(tagQuery);
+                    }
+                }
+            }
             return new Result { Msg = "删除成功" };
         }
     }
