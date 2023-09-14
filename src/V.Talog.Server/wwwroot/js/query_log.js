@@ -67,6 +67,10 @@ let queryLogBody = {
                                     regex: "${regex}",
                                     fieldQuery: "${fieldQuery}",
                                     sort: "${sort}"
+                                },
+                                adaptor: function (payload, response) {
+                                  payload.status = payload.code;
+                                  return payload;
                                 }
                             },
                             body: {
@@ -121,6 +125,10 @@ let queryLogBody = {
                               regex: "${regex}",
                               fieldQuery: "${fieldQuery}",
                               token: token
+                            },
+                            adaptor: function (payload, response) {
+                              payload.status = payload.code;
+                              return payload;
                             }
                           }
                         }
@@ -148,6 +156,10 @@ let queryLogBody = {
                     regex: "${regex}",
                     fieldQuery: "${fieldQuery}",
                     sort: "${sort}"
+                },
+                adaptor: function (payload, response) {
+                  payload.status = payload.code;
+                  return payload;
                 }
             },
             mode: "list",
