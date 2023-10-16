@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\V.Talog.Extension.Serilog\V.Talog.Extension.Serilog.csproj" />
     <ProjectReference Include="..\V.Talog.Extension\V.Talog.Extension.csproj" />
+    <ProjectReference Include="..\V.Talog.Mapper\V.Talog.Mapper.csproj" />
   </ItemGroup>
 
 </Project>

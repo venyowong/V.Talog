@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>1.0.0</Version>
+	  <Authors>Venyo</Authors>
+	  <Description>木叉一人工作室开发的单机日志解决方案-ORM</Description>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageProjectUrl>https://github.com/venyowong/V.Talog</PackageProjectUrl>
+	  <PackageIcon>logo.jpg</PackageIcon>
+	  <PackageTags>Talog,log,orm</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+		<None Include="../../logo.jpg" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\V.Talog.Extension\V.Talog.Extension.csproj" />
+  </ItemGroup>
+
+</Project>

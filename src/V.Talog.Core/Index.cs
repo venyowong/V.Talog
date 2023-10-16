@@ -61,7 +61,7 @@ namespace V.Talog
             if (File.Exists(this.unsavedLogsPath))
             {
                 var logs = JsonConvert.DeserializeObject<ConcurrentBag<TaggedLog>>(File.ReadAllText(this.unsavedLogsPath));
-                this.unsavedLogs = logs;
+                this.unsavedLogs = logs ?? new ConcurrentBag<TaggedLog>();
             }
             else
             {

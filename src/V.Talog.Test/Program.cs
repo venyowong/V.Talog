@@ -1,9 +1,11 @@
 ﻿using Bogus;
 using Serilog;
 using System.Diagnostics;
+using V.Common.Extensions;
 using V.Talog;
 using V.Talog.Client;
 using V.Talog.Extension.Serilog;
+using V.Talog.Mapper;
 using V.Talog.Test;
 
 //V.Talog.Client.Config.TalogServer = "https://vbranch.cn/talog";
@@ -15,10 +17,7 @@ Serilog.Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 using var talogger = new Talogger();
-TaloggerExtension.SetIndexMapping(new IndexMapping());
-talogger.CreateJsonSearcher("1")
-    .RemoveJsonLogs(talogger.CreateQueryByExpression(
-                        "1", $"platform == WinUI && deviceName == COLORFUL"), $"path == 'D:\\素材\\2023\\03\\25\\202303260027.mp4'");
+TaloggerExtension.SetIndexMapping(new TypeMapper());
 
 var logs = new Faker<V.Talog.Test.Log>()
     .RuleFor(l => l.Time, f => f.Date.Between(DateTime.Now.AddDays(-5), DateTime.Now))
@@ -27,11 +26,13 @@ var logs = new Faker<V.Talog.Test.Log>()
     .RuleFor(l => l.UserId, f => f.Random.Guid().ToString())
     .RuleFor(l => l.Message, f => f.Random.Words());
 
-//talogger.CreateJsonSearcher("1")
-//    .RemoveJsonLogs(talogger.CreateQueryByExpression("1", "platform == WinUI && deviceName == COLORFUL"), "path == 'C:\\Users\\Venyo Wong\\Pictures\\amazarashi_百年以后专辑封面.jpg'");
+var log = logs.Generate();
+talogger.Save(log);
+var result = talogger.Query<V.Talog.Test.Log>("level == 2", "IP like 9");
+Console.WriteLine(result.ToJson());
 
-var jsonLogs = talogger.CreateJsonSearcher("1")
-    .SearchJsonLogs(talogger.CreateQueryByExpression("1", "platform == WinUI && deviceName == COLORFUL"));
+// var jsonLogs = talogger.CreateJsonSearcher("1")
+//     .SearchJsonLogs(talogger.CreateQueryByExpression("1", "platform == WinUI && deviceName == COLORFUL"));
 
 //foreach (var i in Enumerable.Range(0, 20))
 //{
@@ -40,7 +41,7 @@ var jsonLogs = talogger.CreateJsonSearcher("1")
 //    Log.Warning(new Exception(log.Message), $"{log.Time} [{log.Level}] {log.IP} {log.Message}");
 //}
 
-var stopwatch = new Stopwatch();
+// var stopwatch = new Stopwatch();
 //var times = 200000;
 //var logList = Enumerable.Range(0, times)
 //    .AsParallel()
@@ -85,19 +86,19 @@ var stopwatch = new Stopwatch();
 //        .Save();
 //}
 
-var query = new Query("level", "0");
-stopwatch.Start();
-var searcher = talogger.CreateHeaderSearcher("log3");
-stopwatch.Stop();
-Console.WriteLine($"初始化 searcher，总耗时：{stopwatch.Elapsed}");
-stopwatch.Restart();
-var logList = searcher.SearchLogs(query);
-stopwatch.Stop();
-Console.WriteLine($"查询日志，总耗时：{stopwatch.Elapsed}");
+// var query = new Query("level", "0");
+// stopwatch.Start();
+// var searcher = talogger.CreateHeaderSearcher("log3");
+// stopwatch.Stop();
+// Console.WriteLine($"初始化 searcher，总耗时：{stopwatch.Elapsed}");
+// stopwatch.Restart();
+// var logList = searcher.SearchLogs(query);
+// stopwatch.Stop();
+// Console.WriteLine($"查询日志，总耗时：{stopwatch.Elapsed}");
 //Console.WriteLine(logList.Count);
 //query = new Query("level", "0").Not();
 //logList = talogger.CreateHeaderSearcher("log3")
 //    .SearchLogs(query);
 //Console.WriteLine(logList.Count);
 
-Console.ReadLine();
+//Console.ReadLine();
