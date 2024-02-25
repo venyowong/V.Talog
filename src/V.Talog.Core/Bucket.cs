@@ -27,20 +27,11 @@ namespace V.Talog
             this.File = Path.Combine(folder, this.Key + ".log");
         }
 
-        public void Append(params string[] data)
-        {
-            FileManager.AppendText(this.File, data);
-        }
+        public void Append(params string[] data) => FileManager.AppendText(this.File, data);
 
-        public override bool Equals(object obj)
-        {
-            if (obj is Bucket b)
-            {
-                return this.Index == b.Index && this.Key == b.Key;
-            }
-
-            return base.Equals(obj);
-        }
+        public override bool Equals(object obj) => obj is Bucket b ? 
+            this.Index == b.Index && this.Key == b.Key : 
+            base.Equals(obj);
 
         public override int GetHashCode()
         {

@@ -262,6 +262,32 @@ namespace V.Talog.Server
 
         private bool IndexLogs(string content, string path, LogFileConfig config)
         {
+            // 初始化 index，避免在服务运行过程中删掉了 index，新数据写入 index 后，后台页面无法查到 index 数据
+            var storedIndexSearcher = this.talogger.CreateJsonSearcher("stored_index");
+            var json = storedIndexSearcher.SearchJsonLogs(new Query("name", config.Index))
+                ?.Select(x => x.Data)
+                .FirstOrDefault();
+            if (json == null)
+            {
+                this.talogger.CreateJsonIndexer("stored_index")
+                    .Tag("name", config.Index)
+                    .Data(JsonConvert.SerializeObject(new
+                    {
+                        index = config.Index,
+                        type = config.Type,
+                        head = config.Head
+                    }))
+                    .Save();
+            }
+            else
+            {
+                if (json["type"]?.ToString() != config.Type.ToString())
+                {
+                    Log.Warning($"LogShipper: 配置({config.ToJson()})与 index 配置(Type={json["type"]})冲突，因此将不会对相应文件进行监听");
+                    return false;
+                }
+            }
+
             string[] logs;
             if (string.IsNullOrWhiteSpace(config.Regex))
             {
