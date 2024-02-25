@@ -356,7 +356,10 @@ namespace V.Talog
         public static IServiceCollection AddTalogger(this IServiceCollection services, Action<Config> config = null, Func<Talogger, IIndexMapping> getMapping = null)
         {
             var talogger = new Talogger();
-            _indexMapping = getMapping(talogger);
+            if (getMapping != null)
+            {
+                _indexMapping = getMapping(talogger);
+            }
             if (config != null)
             {
                 config(talogger.Config);
