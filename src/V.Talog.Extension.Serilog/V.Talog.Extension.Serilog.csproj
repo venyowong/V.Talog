@@ -9,6 +9,7 @@
 	  <PackageProjectUrl>https://github.com/venyowong/V.Talog</PackageProjectUrl>
 	  <PackageIcon>logo.jpg</PackageIcon>
 	  <PackageTags>Talog,log</PackageTags>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
 	<ItemGroup>

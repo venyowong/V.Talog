@@ -19,17 +19,21 @@ Serilog.Log.Logger = new LoggerConfiguration()
 using var talogger = new Talogger();
 TaloggerExtension.SetIndexMapping(new TypeMapper());
 
-var logs = new Faker<V.Talog.Test.Log>()
-    .RuleFor(l => l.Time, f => f.Date.Between(DateTime.Now.AddDays(-5), DateTime.Now))
-    .RuleFor(l => l.Level, f => f.Random.Int(0, 2))
-    .RuleFor(l => l.IP, f => f.Internet.Ip())
-    .RuleFor(l => l.UserId, f => f.Random.Guid().ToString())
-    .RuleFor(l => l.Message, f => f.Random.Words());
+var records = talogger.Query<MonitorRecord>("type == 'bond'", $"CreateTime >= '{DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")}'");
+Console.WriteLine(records);
 
-var log = logs.Generate();
-talogger.Save(log);
-var result = talogger.Query<V.Talog.Test.Log>("level == 2", "IP like 9");
-Console.WriteLine(result.ToJson());
+//var logs = new Faker<V.Talog.Test.Log>()
+//    .RuleFor(l => l.Time, f => f.Date.Between(DateTime.Now.AddDays(-5), DateTime.Now))
+//    .RuleFor(l => l.Level, f => f.Random.Int(0, 2))
+//    .RuleFor(l => l.IP, f => f.Internet.Ip())
+//    .RuleFor(l => l.UserId, f => f.Random.Guid().ToString())
+//    .RuleFor(l => l.Message, f => f.Random.Words())
+//    .RuleFor(l => l.Timestamp, f => f.Date.Soon());
+
+//var log = logs.Generate();
+//talogger.Save(log);
+//var result = talogger.Query<V.Talog.Test.Log>(null, $"Timestamp >= '{DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")}'");
+//Console.WriteLine(result.ToJson());
 
 // var jsonLogs = talogger.CreateJsonSearcher("1")
 //     .SearchJsonLogs(talogger.CreateQueryByExpression("1", "platform == WinUI && deviceName == COLORFUL"));

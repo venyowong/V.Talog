@@ -49,7 +49,7 @@ namespace V.Talog.Mapper
             var indexer = talogger.CreateJsonIndexer(info.IndexName);
             foreach (var tag in info.TagTypes)
             {
-                string name = tag.Value.MemberInfo.Name;
+                string name = tag.Value.OriginalName;
                 var val = type.GetProperty(name)?.GetValue(data) ?? type.GetField(name)?.GetValue(data);
                 if (val != null)
                 {

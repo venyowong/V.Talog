@@ -32,14 +32,14 @@ namespace V.Talog.Mapper
             }
         }
 
-        private void InitTagOrField(MemberInfo memberInfo)
+        private void InitTagOrField(FieldInfo fieldInfo)
         {
-            var tagAttribute = Attribute.GetCustomAttribute(memberInfo, typeof(TagAttribute)) as TagAttribute;
+            var tagAttribute = Attribute.GetCustomAttribute(fieldInfo, typeof(TagAttribute)) as TagAttribute;
             if (tagAttribute == null)
             {
-                if (!this.FieldTypes.ContainsKey(memberInfo.Name))
+                if (!this.FieldTypes.ContainsKey(fieldInfo.Name))
                 {
-                    this.FieldTypes.Add(memberInfo.Name, memberInfo.ReflectedType);
+                    this.FieldTypes.Add(fieldInfo.Name, fieldInfo.FieldType);
                 }
             }
             else
@@ -47,11 +47,35 @@ namespace V.Talog.Mapper
                 var name = tagAttribute.Name;
                 if (string.IsNullOrEmpty(name))
                 {
-                    name = memberInfo.Name;
+                    name = fieldInfo.Name;
                 }
                 if (!this.TagTypes.ContainsKey(name))
                 {
-                    this.TagTypes.Add(name, new TagMapperInfo{ Name = name, MemberInfo = memberInfo });
+                    this.TagTypes.Add(name, new TagMapperInfo{ Name = name, OriginalName = fieldInfo.Name, Type = fieldInfo.FieldType });
+                }
+            }
+        }
+
+        private void InitTagOrField(PropertyInfo propertyInfo)
+        {
+            var tagAttribute = Attribute.GetCustomAttribute(propertyInfo, typeof(TagAttribute)) as TagAttribute;
+            if (tagAttribute == null)
+            {
+                if (!this.FieldTypes.ContainsKey(propertyInfo.Name))
+                {
+                    this.FieldTypes.Add(propertyInfo.Name, propertyInfo.PropertyType);
+                }
+            }
+            else
+            {
+                var name = tagAttribute.Name;
+                if (string.IsNullOrEmpty(name))
+                {
+                    name = propertyInfo.Name;
+                }
+                if (!this.TagTypes.ContainsKey(name))
+                {
+                    this.TagTypes.Add(name, new TagMapperInfo { Name = name, OriginalName = propertyInfo.Name, Type = propertyInfo.PropertyType });
                 }
             }
         }

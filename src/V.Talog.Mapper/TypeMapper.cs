@@ -62,7 +62,7 @@ namespace V.Talog.Mapper
                 throw new Exception($"{index} 不存在 {tag} 字段");
             }
 
-            return info.TagTypes[tag].MemberInfo.ReflectedType;
+            return info.TagTypes[tag].Type;
         }
 
         public TypeMapperInfo GetInfo(Type type)
