@@ -323,7 +323,36 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-## 如果这个项目有帮助到你，不妨支持一下
+## V.Talog.Mapper
 
-![](https://raw.githubusercontent.com/venyowong/V.ClassLibrary/main/imgs/%E5%BE%AE%E4%BF%A1%E6%94%B6%E6%AC%BE%E7%A0%81.jpg)
-![](https://raw.githubusercontent.com/venyowong/V.ClassLibrary/main/imgs/%E6%94%AF%E4%BB%98%E5%AE%9D%E6%94%B6%E6%AC%BE%E7%A0%81.jpg)
+V.Talog.Mapper 是基于 V.Talog.Extension 项目开发的 ORM 框架，使得 Talog 更便于使用。
+
+```
+[Index(Name = "task")]
+public class ReminderTask
+{
+    [Tag(Name = "id")]
+    public string Id { get; set; }
+
+    [Tag(Name = "type")]
+    public int Type { get; set; }
+
+    [Tag(Name = "target")]
+    public int Target { get; set; }
+
+    public int Event { get; set; }
+
+    public string Condition { get; set; }
+
+    public string Channel { get; set; }
+
+    public DateTime CreateTime { get; set; }
+
+    public DateTime UpdateTime { get; set; }
+
+    public bool IsValid { get; set; }
+}
+
+// 添加 Talogger 模块到项目时，传入 TypeMapper 用于映射关系，TypeMapper 会自动扫描所有带有 Index 特性的类
+builder.Services.AddTalogger(getMapping: _ => new TypeMapper());
+```
