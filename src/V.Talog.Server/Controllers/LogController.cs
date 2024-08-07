@@ -97,7 +97,7 @@ namespace V.Talog.Server.Controllers
                 return new Result { Code = -1, Msg = $"{request.TagQuery} 解析失败，请检查表达式" };
             }
 
-            if ((!string.IsNullOrWhiteSpace(request.FieldQuery) || !string.IsNullOrWhiteSpace(request.Sort)) && string.IsNullOrWhiteSpace(request.Regex))
+            if (!string.IsNullOrWhiteSpace(request.FieldQuery) && string.IsNullOrWhiteSpace(request.Regex))
             {
                 var searcher = this.talogger.CreateJsonSearcher(request.Index);
                 var logs = searcher.SearchJsonLogs(tagQuery, request.Sort, request.FieldQuery);
