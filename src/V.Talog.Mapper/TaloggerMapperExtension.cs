@@ -42,6 +42,19 @@ namespace V.Talog.Mapper
             return logs.Select(l => l.Data.ToObject<T>()).ToList();
         }
 
+        /// <summary>
+        /// 查询最新版本的数据
+        /// </summary>
+        /// <returns></returns>
+        public static List<T> QueryLatest<T>(this Talogger talogger, string tagQuery, string fieldQuery) where T : IVersioned
+        {
+            var list = talogger.Query<T>(tagQuery, fieldQuery);
+            return list.GroupBy(x => x.Id)
+                .Select(x => x.OrderByDescending(item => item.UpdateTime).First())
+                .Where(x => x.IsValid)
+                .ToList();
+        }
+
         private static void Save(Talogger talogger, Type type, object data)
         {
             var mapper = new TypeMapper();

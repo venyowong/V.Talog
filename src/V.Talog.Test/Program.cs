@@ -19,8 +19,22 @@ Serilog.Log.Logger = new LoggerConfiguration()
 using var talogger = new Talogger();
 TaloggerExtension.SetIndexMapping(new TypeMapper());
 
-var records = talogger.Query<MonitorRecord>("type == 'bond'", $"CreateTime >= '{DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")}'");
-Console.WriteLine(records);
+var model = new Model
+{
+    Id = Guid.NewGuid().ToString(),
+    IsValid = true,
+    CreateTime = DateTime.Now,
+    UpdateTime = DateTime.Now
+};
+talogger.Save(model);
+model.IsValid = false;
+model.UpdateTime = DateTime.Now;
+talogger.Save(model);
+var list = talogger.QueryLatest<Model>(null, null);
+Console.WriteLine();
+
+//var records = talogger.Query<MonitorRecord>("type == 'bond'", $"CreateTime >= '{DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")}'");
+//Console.WriteLine(records);
 
 //var logs = new Faker<V.Talog.Test.Log>()
 //    .RuleFor(l => l.Time, f => f.Date.Between(DateTime.Now.AddDays(-5), DateTime.Now))
