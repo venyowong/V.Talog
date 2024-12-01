@@ -47,9 +47,16 @@ namespace V.Talog
             this.indexPath = Path.Combine(folder, "index.json");
             if (File.Exists(this.indexPath))
             {
-                var idx = JsonConvert.DeserializeObject<Index>(File.ReadAllText(this.indexPath), new JsonSerializerSettings { MaxDepth = null });
-                this.Tries = idx.Tries;
-                this.Buckets = idx.Buckets;
+                try
+                {
+                    var idx = JsonConvert.DeserializeObject<Index>(File.ReadAllText(this.indexPath), new JsonSerializerSettings { MaxDepth = null });
+                    this.Tries = idx.Tries;
+                    this.Buckets = idx.Buckets;
+                }
+                catch (Exception e)
+                {
+                    throw new Exception($"{this.indexPath} 文件已损坏", e);
+                }
             }
             else
             {
@@ -60,8 +67,15 @@ namespace V.Talog
             this.unsavedLogsPath = Path.Combine(folder, "unsaved.json");
             if (File.Exists(this.unsavedLogsPath))
             {
-                var logs = JsonConvert.DeserializeObject<ConcurrentBag<TaggedLog>>(File.ReadAllText(this.unsavedLogsPath));
-                this.unsavedLogs = logs ?? new ConcurrentBag<TaggedLog>();
+                try
+                {
+                    var logs = JsonConvert.DeserializeObject<ConcurrentBag<TaggedLog>>(File.ReadAllText(this.unsavedLogsPath));
+                    this.unsavedLogs = logs ?? new ConcurrentBag<TaggedLog>();
+                }
+                catch (Exception e)
+                {
+                    throw new Exception($"{this.unsavedLogsPath} 文件已损坏", e);
+                }
             }
             else
             {
@@ -209,9 +223,6 @@ namespace V.Talog
         public void Dispose()
         {
             this.Save();
-
-            FileManager.TryRelease(this.Buckets.Values.Select(x => x.File).ToArray());
-            FileManager.TryRelease(this.unsavedLogsPath, this.indexPath);
         }
     }
 }

@@ -154,8 +154,6 @@ namespace V.Talog
                     }
                 }
 
-                FileManager.Flush();
-
                 Thread.Sleep(this.Config.TaloggerAutoSaveInterval);
             }
         }
