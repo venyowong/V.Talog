@@ -387,7 +387,7 @@ namespace V.Talog
             var orders = sortExp.Split(new string[] { " then " }, StringSplitOptions.RemoveEmptyEntries);
             IOrderedEnumerable<T> sortResult;
             var strs = orders[0].Trim().Split(' ');
-            var type = _indexMapping.GetFieldType(index, strs[0]);
+            var type = GetSortType(index, strs[0]);
             if (strs.Length > 1 && strs[1].ToLower() == "desc")
             {
                 sortResult = logs.OrderByDescending(x =>
@@ -415,7 +415,7 @@ namespace V.Talog
             for (int i = 1; i < orders.Length; i++)
             {
                 strs = orders[i].Trim().Split(' ');
-                type = _indexMapping.GetFieldType(index, strs[0]);
+                type = GetSortType(index, strs[0]);
                 if (strs.Length > 1 && strs[1].ToLower() == "desc")
                 {
                     sortResult = sortResult.ThenByDescending(x =>
@@ -443,6 +443,18 @@ namespace V.Talog
             }
 
             return sortResult.ToList();
+        }
+
+        private static Type GetSortType(string index, string field)
+        {
+            try
+            {
+                return _indexMapping.GetTagType(index, field);
+            }
+            catch
+            {
+                return _indexMapping.GetFieldType(index, field);
+            }
         }
 
         private static Query BuildQuery(QueryExpression expression, Index index)
