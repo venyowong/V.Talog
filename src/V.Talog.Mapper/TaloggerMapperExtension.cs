@@ -56,6 +56,15 @@ namespace V.Talog.Mapper
                 .ToList();
         }
 
+        public static void Remove<T>(this Talogger talogger, string tagQuery, string fieldQuery)
+        {
+            var type = typeof(T);
+            var mapper = new TypeMapper();
+            var info = mapper.GetInfo(type) ?? throw new Exception($"{type.Name} 必须使用 IndexAttribute 标注才可调用该方法");
+            var searcher = talogger.CreateJsonSearcher(info.IndexName);
+            searcher.RemoveJsonLogs(talogger.CreateQueryByExpression(info.IndexName, tagQuery), fieldQuery);
+        }
+
         private static void Save(Talogger talogger, Type type, object data)
         {
             var mapper = new TypeMapper();
